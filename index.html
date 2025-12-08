@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="sr" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nalozi za utovar | Berza Transporta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        /* Light Mode Variables */
+        --background: #FFFFFF;
+        --surface: #F4F4F5; /* zinc-100 */
+        --surface-highlight: #E4E4E7; /* zinc-200 */
+        --border: #E4E4E7; /* zinc-200 */
+        --text-main: #18181B; /* zinc-900 */
+        --text-muted: #71717A; /* zinc-500 */
+        --text-inverted: #FAFAFA;
+        --dot-color: #d4d4d8; /* Visible in light mode */
+        --grid-line-color: transparent; /* Hide grid lines in light mode */
+      }
+      
+      .dark {
+        /* Dark Mode Variables */
+        --background: #09090B;
+        --surface: #18181B;
+        --surface-highlight: #27272A;
+        --border: rgba(255, 255, 255, 0.1);
+        --text-main: #FAFAFA;
+        --text-muted: #A1A1AA;
+        --text-inverted: #18181B;
+        --dot-color: rgba(255, 255, 255, 0.1);
+        --grid-line-color: rgba(255, 255, 255, 0.1); /* Show grid lines in dark mode */
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--background);
+        color: var(--text-main);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      .hover-lift {
+        transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s cubic-bezier(0.2, 0, 0, 1);
+      }
+      .hover-lift:hover {
+        transform: translateY(-4px);
+      }
+      
+      .text-gradient {
+        background: linear-gradient(to right, var(--text-main), #86EFAC);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .text-gradient-green {
+        background: linear-gradient(to right, #4ADE80, #22C55E);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      
+      .bg-dot-pattern {
+        background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+        background-size: 24px 24px;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--background);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--surface-highlight);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #3F3F46;
+      }
+      
+      /* 3D Utilities */
+      .perspective-1000 {
+        perspective: 1000px;
+      }
+      .transform-style-3d {
+        transform-style: preserve-3d;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: 'var(--background)',
+              surface: 'var(--surface)',
+              surfaceHighlight: 'var(--surface-highlight)',
+              border: 'var(--border)',
+              text: {
+                 main: 'var(--text-main)',
+                 muted: 'var(--text-muted)',
+                 inverted: 'var(--text-inverted)',
+              },
+              brand: {
+                50: '#F0FDF4',
+                100: '#DCFCE7',
+                200: '#BBF7D0',
+                300: '#86EFAC',
+                400: '#4ADE80', // Ordinal Neon Green
+                500: '#22C55E',
+                600: '#16A34A',
+                700: '#15803D',
+                800: '#166534',
+                900: '#14532D',
+              },
+            },
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            },
+            borderRadius: {
+              '4xl': '2rem',
+              '5xl': '2.5rem',
+            },
+            boxShadow: {
+              'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.1), 0 10px 20px -2px rgba(0, 0, 0, 0.05)',
+              'glow': '0 0 20px rgba(74, 222, 128, 0.15)',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.8s ease-out forwards',
+              'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'float': 'float 6s ease-in-out infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'draw': 'draw 1.5s ease-out forwards',
+              'draw-loop': 'drawLoop 3s ease-in-out infinite',
+              'spin-slow': 'spin 12s linear infinite',
+              'sidebar-loop': 'sidebarLoop 6s ease-in-out infinite',
+              'progress-loop': 'progressLoop 4s ease-in-out infinite',
+              'radar-ping': 'radarPing 3s cubic-bezier(0, 0, 0.2, 1) infinite',
+              'scan': 'scan 3s linear infinite',
+              'shimmer': 'shimmer 2s linear infinite',
+              'pulse-hex': 'pulseHex 2s ease-in-out infinite',
+              'dash': 'dash 20s linear infinite',
+              'scan-vertical': 'scanVertical 3s ease-in-out infinite',
+              'float-slow': 'float 8s ease-in-out infinite',
+              'traffic': 'traffic 1s linear infinite',
+              'scan-fast': 'scanVertical 1.5s ease-in-out infinite alternate',
+              'scan-horizontal': 'scanHorizontal 4s linear infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              draw: {
+                '0%': { width: '0%', opacity: '0' },
+                '100%': { width: '100%', opacity: '1' },
+              },
+              drawLoop: {
+                 '0%': { strokeDashoffset: '100' },
+                 '50%': { strokeDashoffset: '0' },
+                 '100%': { strokeDashoffset: '-100' },
+              },
+              sidebarLoop: {
+                '0%, 100%': { transform: 'translateX(100%)' }, 
+                '20%, 80%': { transform: 'translateX(0)' },    
+              },
+              progressLoop: {
+                '0%': { width: '0%' },
+                '100%': { width: '100%' },
+              },
+              radarPing: {
+                '75%, 100%': { transform: 'scale(2)', opacity: '0' },
+              },
+              scan: {
+                '0%, 100%': { top: '0%' },
+                '50%': { top: '100%' },
+              },
+              shimmer: {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' },
+              },
+              pulseHex: {
+                '0%, 100%': { opacity: '0.1' },
+                '50%': { opacity: '0.6' },
+              },
+              dash: {
+                '0%': { strokeDashoffset: '1000' },
+                '100%': { strokeDashoffset: '0' },
+              },
+              scanVertical: {
+                '0%, 100%': { top: '0%' },
+                '50%': { top: '100%' },
+              },
+              traffic: {
+                '0%': { transform: 'translateX(-50%)' },
+                '100%': { transform: 'translateX(0%)' },
+              },
+              scanHorizontal: {
+                '0%': { left: '-10%' },
+                '100%': { left: '110%' },
+              }
+            },
+          },
+        },
+      };
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/": "https://esm.sh/react@18.3.1/",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/": "https://esm.sh/react-dom@18.3.1/",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.28.0?deps=react@18.3.1,react-dom@18.3.1",
+    "clsx": "https://esm.sh/clsx@2.1.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?deps=react@18.3.1",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@2.2.1"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
