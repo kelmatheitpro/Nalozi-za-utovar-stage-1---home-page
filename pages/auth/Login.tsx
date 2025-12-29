@@ -31,7 +31,7 @@ export const Login = () => {
 
       <div className="w-full max-w-md space-y-8 relative z-10">
         <div className="text-center">
-          <Link to="/" className="mx-auto inline-flex items-center gap-2 mb-8">
+          <Link to="/" className="mx-auto inline-flex items-center gap-2 mb-8 hover:opacity-80 transition-opacity">
             <div className="h-8 w-8 bg-brand-400 rounded-sm flex items-center justify-center text-black shadow-glow">
                 <ArrowLeftRight className="h-4 w-4" />
             </div>
@@ -57,7 +57,7 @@ export const Login = () => {
             <div className="space-y-1">
                <div className="flex justify-between">
                   <label className="block text-sm font-medium text-text-muted">Lozinka</label>
-                  <a href="#" className="text-xs text-brand-500 hover:text-brand-400">Zaboravljena lozinka?</a>
+                  <Link to="/forgot-password" className="text-xs text-brand-500 hover:text-brand-400">Zaboravljena lozinka?</Link>
                </div>
                <Input
                  type="password"

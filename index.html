@@ -8,16 +8,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       :root {
-        /* Light Mode Variables */
-        --background: #FFFFFF;
-        --surface: #F4F4F5; /* zinc-100 */
-        --surface-highlight: #E4E4E7; /* zinc-200 */
-        --border: #E4E4E7; /* zinc-200 */
-        --text-main: #18181B; /* zinc-900 */
-        --text-muted: #71717A; /* zinc-500 */
+        /* Light Mode Variables - Softer, warmer palette */
+        --background: #FAFAF9; /* stone-50 - warmer off-white */
+        --surface: #F5F5F4; /* stone-100 - subtle warm gray */
+        --surface-highlight: #E7E5E4; /* stone-200 - soft contrast */
+        --border: #D6D3D1; /* stone-300 - visible but soft borders */
+        --text-main: #1C1917; /* stone-900 - deep warm black */
+        --text-muted: #78716C; /* stone-500 - warm muted text */
         --text-inverted: #FAFAFA;
-        --dot-color: #d4d4d8; /* Visible in light mode */
-        --grid-line-color: transparent; /* Hide grid lines in light mode */
+        --dot-color: #D6D3D1; /* Subtle dots */
+        --grid-line-color: rgba(0, 0, 0, 0.03); /* Very subtle grid */
       }
       
       .dark {
@@ -38,8 +38,15 @@
         background-color: var(--background);
         color: var(--text-main);
         -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
         overflow-x: hidden;
         transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      /* Subtle texture for light theme */
+      body:not(.dark) {
+        background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.015) 1px, transparent 0);
+        background-size: 40px 40px;
       }
       
       .hover-lift {
@@ -51,12 +58,14 @@
       
       .text-gradient {
         background: linear-gradient(to right, var(--text-main), #86EFAC);
+        background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
 
       .text-gradient-green {
         background: linear-gradient(to right, #4ADE80, #22C55E);
+        background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
@@ -137,6 +146,10 @@
               'spin-slow': 'spin 12s linear infinite',
               'sidebar-loop': 'sidebarLoop 6s ease-in-out infinite',
               'progress-loop': 'progressLoop 4s ease-in-out infinite',
+              'progress-fill': 'progressFill 2s ease-out forwards',
+              'progress-loop-smooth': 'progressLoopSmooth 6s ease-in-out infinite',
+              'data-pulse': 'dataPulse 3s ease-in-out infinite',
+              'subtle-glow': 'subtleGlow 4s ease-in-out infinite',
               'radar-ping': 'radarPing 3s cubic-bezier(0, 0, 0.2, 1) infinite',
               'scan': 'scan 3s linear infinite',
               'shimmer': 'shimmer 2s linear infinite',
@@ -144,9 +157,28 @@
               'dash': 'dash 20s linear infinite',
               'scan-vertical': 'scanVertical 3s ease-in-out infinite',
               'float-slow': 'float 8s ease-in-out infinite',
+              'float-gentle': 'float-gentle 5s ease-in-out infinite',
               'traffic': 'traffic 1s linear infinite',
               'scan-fast': 'scanVertical 1.5s ease-in-out infinite alternate',
               'scan-horizontal': 'scanHorizontal 4s linear infinite',
+              'draw-line': 'drawLine 2s ease-out forwards',
+              'orbit': 'orbit 6s linear infinite',
+              'orbit-reverse': 'orbitReverse 8s linear infinite',
+              'float-particle': 'floatParticle 4s ease-in-out infinite',
+              'draw-route': 'drawRoute 3s ease-in-out infinite',
+              'float-efficiency': 'floatEfficiency 3s ease-in-out infinite',
+              'pulse-line': 'pulseLine 3s ease-in-out infinite',
+              'move-dot': 'moveDot 3s ease-in-out infinite',
+              'float-bubble': 'floatBubble 4s ease-in-out infinite',
+              'notification-slide': 'notificationSlide 4s ease-in-out infinite',
+              'float-icon': 'floatIcon 3s ease-in-out infinite',
+              'notification-stack': 'notificationStack 6s ease-in-out infinite',
+              'bell-float': 'bellFloat 4s ease-in-out infinite',
+              'bell-ring': 'bellRing 2s ease-in-out infinite',
+            },
+            backgroundImage: {
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+              'gradient-conic': 'conic-gradient(var(--tw-gradient-stops))',
             },
             keyframes: {
               fadeIn: {
@@ -160,6 +192,10 @@
               float: {
                 '0%, 100%': { transform: 'translateY(0)' },
                 '50%': { transform: 'translateY(-10px)' },
+              },
+              'float-gentle': {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-6px)' },
               },
               draw: {
                 '0%': { width: '0%', opacity: '0' },
@@ -177,6 +213,27 @@
               progressLoop: {
                 '0%': { width: '0%' },
                 '100%': { width: '100%' },
+              },
+              progressFill: {
+                '0%': { width: '0%' },
+                '70%': { width: '75%' },
+                '85%': { width: '75%' },
+                '100%': { width: '0%' },
+              },
+              progressLoopSmooth: {
+                '0%': { width: '0%' },
+                '25%': { width: '75%' },
+                '75%': { width: '75%' },
+                '90%': { width: '0%' },
+                '100%': { width: '0%' },
+              },
+              dataPulse: {
+                '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+                '50%': { opacity: '1', transform: 'scale(1.05)' },
+              },
+              subtleGlow: {
+                '0%, 100%': { boxShadow: '0 0 5px rgba(74, 222, 128, 0.2)' },
+                '50%': { boxShadow: '0 0 15px rgba(74, 222, 128, 0.4)' },
               },
               radarPing: {
                 '75%, 100%': { transform: 'scale(2)', opacity: '0' },
@@ -206,9 +263,91 @@
                 '100%': { transform: 'translateX(0%)' },
               },
               scanHorizontal: {
-                '0%': { left: '-10%' },
-                '100%': { left: '110%' },
-              }
+                '0%': { left: '0%' },
+                '50%': { left: 'calc(100% - 8px)' },
+                '100%': { left: '0%' },
+              },
+              drawLine: {
+                '0%': { strokeDashoffset: '400' },
+                '100%': { strokeDashoffset: '0' },
+              },
+              'gauge-fill': {
+                '0%': { strokeDashoffset: '126' },
+                '100%': { strokeDashoffset: '20' },
+              },
+              'data-pulse': {
+                '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+                '50%': { opacity: '0.8', transform: 'scale(1.02)' },
+              },
+              'subtle-shimmer': {
+                '0%': { transform: 'translateX(-100%)', opacity: '0' },
+                '50%': { opacity: '1' },
+                '100%': { transform: 'translateX(100%)', opacity: '0' },
+              },
+              orbit: {
+                '0%': { transform: 'rotate(0deg) translateX(40px) rotate(0deg)' },
+                '100%': { transform: 'rotate(360deg) translateX(40px) rotate(-360deg)' },
+              },
+              orbitReverse: {
+                '0%': { transform: 'rotate(0deg) translateX(30px) rotate(0deg)' },
+                '100%': { transform: 'rotate(-360deg) translateX(30px) rotate(360deg)' },
+              },
+              floatParticle: {
+                '0%': { transform: 'translateY(100px) translateX(0px)', opacity: '0' },
+                '10%': { opacity: '1' },
+                '90%': { opacity: '1' },
+                '100%': { transform: 'translateY(-100px) translateX(50px)', opacity: '0' },
+              },
+              drawRoute: {
+                '0%': { strokeDashoffset: '200' },
+                '50%': { strokeDashoffset: '0' },
+                '100%': { strokeDashoffset: '-200' },
+              },
+              floatEfficiency: {
+                '0%, 100%': { transform: 'translateY(0px) scale(1)', opacity: '0.4' },
+                '50%': { transform: 'translateY(-10px) scale(1.2)', opacity: '1' },
+              },
+              pulseLine: {
+                '0%, 100%': { opacity: '0.8', strokeWidth: '2' },
+                '50%': { opacity: '1', strokeWidth: '3' },
+              },
+              moveDot: {
+                '0%, 100%': { r: '3', opacity: '1' },
+                '50%': { r: '4', opacity: '0.8' },
+              },
+              floatBubble: {
+                '0%': { transform: 'translateY(0px) scale(0.8)', opacity: '0' },
+                '20%': { opacity: '0.6' },
+                '80%': { opacity: '0.6' },
+                '100%': { transform: 'translateY(-30px) scale(1.2)', opacity: '0' },
+              },
+              notificationSlide: {
+                '0%': { transform: 'translateX(100%) scale(0.8)', opacity: '0' },
+                '15%': { transform: 'translateX(0%) scale(1)', opacity: '1' },
+                '85%': { transform: 'translateX(0%) scale(1)', opacity: '1' },
+                '100%': { transform: 'translateX(-100%) scale(0.8)', opacity: '0' },
+              },
+              floatIcon: {
+                '0%': { transform: 'translateY(10px) scale(0)', opacity: '0' },
+                '50%': { transform: 'translateY(-5px) scale(1)', opacity: '0.7' },
+                '100%': { transform: 'translateY(10px) scale(0)', opacity: '0' },
+              },
+              notificationStack: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '15%': { transform: 'translateY(0px)', opacity: '1' },
+                '85%': { transform: 'translateY(0px)', opacity: '1' },
+                '100%': { transform: 'translateY(-20px)', opacity: '0' },
+              },
+              bellFloat: {
+                '0%, 100%': { transform: 'translateY(0px) rotate(0deg)', opacity: '0' },
+                '20%, 80%': { transform: 'translateY(-5px) rotate(-10deg)', opacity: '1' },
+                '50%': { transform: 'translateY(-8px) rotate(10deg)', opacity: '1' },
+              },
+              bellRing: {
+                '0%, 100%': { transform: 'rotate(0deg)' },
+                '25%': { transform: 'rotate(-15deg)' },
+                '75%': { transform: 'rotate(15deg)' },
+              },
             },
           },
         },
@@ -232,5 +371,6 @@
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

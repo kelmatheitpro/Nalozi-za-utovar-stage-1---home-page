@@ -4,6 +4,86 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Truck, Check, Package, Zap, BarChart, ArrowLeftRight, Shield, Bell, Map, Search, ChevronRight, Play, LayoutGrid, Smartphone, Mail, Sun, Moon, Users, Globe, Clock, HelpCircle, FileText, Navigation, Filter, Sliders, X, MousePointer2, ShieldCheck, Box, Wifi, Home, User, Plus, Battery, Quote, Star, TrendingUp } from 'lucide-react';
 import { Button, Badge, Card, cn } from '../components/UIComponents';
 import { useStore } from '../context/StoreContext';
+import { features } from 'process';
+
+// Counting Number Animation Component
+const CountingNumber = ({ target, duration = 2000, delay = 0, format }) => {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setStarted(true);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  useEffect(() => {
+    if (!started) return;
+
+    let startTime = null;
+    const animate = (currentTime) => {
+      if (startTime === null) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentCount = Math.floor(easeOutQuart * target);
+      
+      setCount(currentCount);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }, [started, target, duration]);
+
+  // Format the number based on the final format
+  const formatNumber = (num) => {
+    if (format.includes('€') && format.includes('k')) {
+      return `€${(num / 1000).toFixed(1)}k`;
+    }
+    return num.toString();
+  };
+
+  return <span>{started ? formatNumber(count) : '0'}</span>;
+};
+
+// Typewriter Text Animation Component
+const TypewriterText = ({ text, delay = 0, speed = 50 }) => {
+  const [displayText, setDisplayText] = useState('');
+  const [started, setStarted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setStarted(true);
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  useEffect(() => {
+    if (!started) return;
+
+    let currentIndex = 0;
+    const interval = setInterval(() => {
+      if (currentIndex <= text.length) {
+        setDisplayText(text.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(interval);
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [started, text, speed]);
+
+  return <span>{displayText}<span className="animate-pulse">|</span></span>;
+};
+
 
 export const Landing = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -39,7 +119,7 @@ export const Landing = () => {
       name: "Marko Jovanović",
       role: "Direktor",
       company: "Balkan Trans Logistike",
-      quote: "Nalozi za utovar su nam uštedeli sate telefoniranja. Pronašli smo povratne ture za 80% naših kamiona u prva tri meseca korišćenja.",
+      quote: "TeretLink nam je uštedeo sate telefoniranja. Pronašli smo povratne ture za 80% naših kamiona u prva tri meseca korišćenja.",
       metric: "Profit ↑ 30%",
       rating: 5
     },
@@ -67,18 +147,25 @@ export const Landing = () => {
       {/* Navbar */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled ? 'bg-background/90 backdrop-blur-md border-border py-3' : 'bg-transparent border-transparent py-6'}`}>
         <div className="mx-auto flex h-10 max-w-7xl items-center justify-between px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-             <div className="h-6 w-6 bg-brand-400 rounded-sm flex items-center justify-center text-black shadow-glow">
-                <ArrowLeftRight className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-2.5">
+             <div className="h-7 w-7 bg-brand-500 rounded-lg flex items-center justify-center shadow-sm">
+                <span className="text-white dark:text-black font-black text-lg leading-none">T</span>
              </div>
-             <span className="text-lg font-bold tracking-tight text-text-main">Nalozi<span className="text-text-muted">.</span></span>
+             <div className="flex items-baseline gap-0.5">
+                <span className="text-xl font-bold tracking-tight text-text-main">Teret</span>
+                <span className="text-xl font-bold tracking-tight text-brand-500">Link</span>
+             </div>
           </div>
           <div className="hidden md:flex items-center gap-8">
              <a href="#features" className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">Mogućnosti</a>
              <Link to="/pricing" className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">Cenovnik</Link>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={toggleTheme} className="p-2 text-text-muted hover:text-text-main transition-colors">
+          <div className="flex items-center gap-3">
+            <select className="h-9 pl-3 pr-8 rounded-lg bg-surface border border-border text-text-main text-xs font-medium focus:outline-none focus:border-brand-500 transition-colors cursor-pointer appearance-none bg-no-repeat bg-right" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A1AA' d='M6 9L1 4h10z'/%3E%3C/svg%3E\")", backgroundPosition: 'right 0.5rem center', backgroundSize: '12px' }}>
+              <option>🇷🇸 SR</option>
+              <option>🇬🇧 EN</option>
+            </select>
+            <button onClick={toggleTheme} className="h-9 w-9 rounded-lg bg-surface border border-border flex items-center justify-center text-text-muted hover:text-text-main hover:border-brand-500/50 transition-all">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
             <Link to="/login" className="hidden sm:block text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">
@@ -116,7 +203,7 @@ export const Landing = () => {
              </h1>
              
              <p className="text-lg text-text-muted mb-10 leading-relaxed max-w-2xl mx-auto animate-slide-up animation-delay-100 font-light">
-               Nalozi za utovar je napredna platforma koja povezuje prevoznike i špeditere. 
+               TeretLink je napredna platforma koja povezuje prevoznike i špeditere. 
                Bez posrednika, bez skrivenih troškova.
              </p>
              
@@ -136,82 +223,111 @@ export const Landing = () => {
 
          {/* Dashboard Image Mockup */}
          <div className="mt-32 mx-auto max-w-6xl relative animate-slide-up animation-delay-300">
-            <div className="rounded-xl border border-border bg-surface/80 backdrop-blur-sm p-2 shadow-2xl relative overflow-hidden group">
-               <div className="absolute inset-0 bg-gradient-to-tr from-brand-500/5 via-transparent to-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+            {/* Clean Central Glow - Inside Dashboard */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 ease-out pointer-events-none overflow-hidden rounded-xl z-0">
+               {/* Single Beautiful Central Glow */}
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-64 bg-gradient-radial from-brand-500/25 via-brand-400/12 to-transparent blur-[80px] animate-pulse" style={{ animationDuration: '4s' }}></div>
                
-               {/* Mock UI Header */}
-               <div className="h-12 border-b border-border flex items-center justify-between px-4 bg-surfaceHighlight/50">
+               {/* Subtle Inner Highlight */}
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-40 bg-gradient-radial from-green-400/20 via-brand-500/8 to-transparent blur-[60px]"></div>
+            </div>
+            
+            <div className="rounded-xl border border-border bg-surface/80 backdrop-blur-sm p-2 shadow-2xl relative overflow-hidden group transition-all duration-500 hover:shadow-[0_25px_50px_rgba(74,222,128,0.1)] dark:hover:shadow-[0_25px_50px_rgba(74,222,128,0.15)] hover:border-brand-500/30 z-10">
+               
+               {/* Clean Mock UI Header */}
+               <div className="h-12 border-b border-border flex items-center justify-between px-4 bg-surfaceHighlight/30">
                   <div className="flex items-center gap-4">
                      <div className="flex gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/20"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/20"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/30"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/30"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/30"></div>
                      </div>
                      <div className="h-4 w-px bg-border mx-2"></div>
                      <div className="flex gap-4 text-[10px] font-mono text-text-muted">
-                        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span> Online</span>
-                        <span>v2.4.0</span>
+                        <span className="flex items-center gap-1 opacity-0 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
+                           <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span> 
+                           Online
+                        </span>
+                        <span className="opacity-0 animate-fade-in" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+                           v2.4.0
+                        </span>
                      </div>
                   </div>
                   <div className="flex items-center gap-3">
-                     <div className="text-[10px] font-bold text-text-muted bg-surface px-2 py-1 rounded border border-border">PROFIL: TRANS-LOGISTIK DOO</div>
+                     <div className="text-[10px] font-bold text-text-muted bg-surface px-2 py-1 rounded border border-border opacity-0 animate-fade-in hover:border-brand-500/30 hover:text-brand-500 transition-all duration-300" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
+                        PROFIL: TRANS-LOGISTIK DOO
+                     </div>
                   </div>
                </div>
                
                {/* Mock Content */}
                <div className="aspect-[16/9] md:aspect-[21/9] bg-background relative overflow-hidden flex">
-                  {/* Mock Sidebar */}
-                  <div className="w-48 border-r border-border p-4 space-y-4 hidden md:flex flex-col bg-surface/30">
+                  {/* Clean Mock Sidebar */}
+                  <div className="w-48 border-r border-border p-4 space-y-4 hidden md:flex flex-col bg-surface/20">
                      <div className="space-y-1 mb-6">
-                        <div className="h-8 w-full bg-brand-500/10 border border-brand-500/20 rounded flex items-center px-3 text-brand-500 text-xs font-bold gap-2">
+                        <div className="h-8 w-full bg-brand-500/10 border border-brand-500/20 rounded flex items-center px-3 text-brand-500 text-xs font-bold gap-2 opacity-0 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
                            <LayoutGrid className="h-3.5 w-3.5" />
                            Kontrolna Tabla
                         </div>
-                        <div className="h-8 w-full hover:bg-surface rounded flex items-center px-3 text-text-muted text-xs font-medium gap-2 transition-colors">
+                        <div className="h-8 w-full rounded flex items-center px-3 text-text-muted text-xs font-medium gap-2 transition-colors duration-200 opacity-0 animate-fade-in hover:bg-surfaceHighlight" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
                            <Package className="h-3.5 w-3.5" />
                            Moje Ture
                         </div>
-                        <div className="h-8 w-full hover:bg-surface rounded flex items-center px-3 text-text-muted text-xs font-medium gap-2 transition-colors">
+                        <div className="h-8 w-full rounded flex items-center px-3 text-text-muted text-xs font-medium gap-2 transition-colors duration-200 opacity-0 animate-fade-in hover:bg-surfaceHighlight" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
                            <Truck className="h-3.5 w-3.5" />
                            Moji Kamioni
                         </div>
                      </div>
                      
-                     <div className="mt-auto p-3 bg-surface rounded border border-border">
-                        <div className="text-[10px] text-text-muted mb-1">Pretplata</div>
+                     <div className="mt-auto p-3 bg-surface rounded border border-border opacity-0 animate-fade-in hover:border-brand-500/30 transition-all duration-300 group" style={{ animationDelay: '1.1s', animationFillMode: 'forwards' }}>
+                        <div className="text-[10px] text-text-muted mb-1 group-hover:text-brand-500 transition-colors">Pretplata</div>
                         <div className="text-xs text-text-main font-bold">Premium Paket</div>
                         <div className="w-full bg-surfaceHighlight h-1 mt-2 rounded-full overflow-hidden">
-                           <div className="w-3/4 h-full bg-brand-500"></div>
+                           <div className="h-full bg-brand-500 w-3/4 transition-all duration-1000 group-hover:w-full"></div>
                         </div>
                      </div>
                   </div>
                   
                   {/* Mock Main Area */}
                   <div className="flex-1 p-6 flex flex-col">
-                     {/* Stats Row */}
+                     {/* Clean Stats Row */}
                      <div className="grid grid-cols-4 gap-4 mb-6">
                         {[
-                           { label: 'Aktivne Ture', val: '12', color: 'text-text-main' },
-                           { label: 'Slobodni Kamioni', val: '5', color: 'text-brand-500' },
-                           { label: 'Zarada (Okt)', val: '€14.2k', color: 'text-text-main' },
-                           { label: 'Pregleda', val: '843', color: 'text-text-muted' },
+                           { label: 'Aktivne Ture', val: 12, finalVal: '12', color: 'text-text-main', delay: '1s' },
+                           { label: 'Slobodni Kamioni', val: 5, finalVal: '5', color: 'text-brand-500', delay: '1.2s' },
+                           { label: 'Zarada (Okt)', val: 14200, finalVal: '€14.2k', color: 'text-text-main', delay: '1.4s' },
+                           { label: 'Pregleda', val: 843, finalVal: '843', color: 'text-text-muted', delay: '1.6s' },
                         ].map((stat, i) => (
-                           <div key={i} className="bg-surface border border-border rounded p-3">
-                              <div className="text-[9px] uppercase tracking-wider text-text-muted font-bold mb-1">{stat.label}</div>
-                              <div className="text-xl font-mono font-bold text-text-main">{stat.val}</div>
+                           <div key={i} className="bg-surface border border-border rounded-lg p-3 opacity-0 animate-fade-in transition-all duration-300 hover:bg-surfaceHighlight hover:shadow-sm group relative overflow-hidden" style={{ animationDelay: stat.delay, animationFillMode: 'forwards' }}>
+                              {/* Subtle inner glow on parent hover */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg"></div>
+                              
+                              <div className="text-[9px] uppercase tracking-wider text-text-muted font-bold mb-1 relative z-10">{stat.label}</div>
+                              <div className={`text-xl font-mono font-bold ${stat.color} relative z-10`}>
+                                 <CountingNumber 
+                                    target={stat.val} 
+                                    duration={2000} 
+                                    delay={parseInt(stat.delay) * 1000} 
+                                    format={stat.finalVal}
+                                 />
+                              </div>
                            </div>
                         ))}
                      </div>
 
                      <div className="flex justify-between items-center mb-4">
-                        <div className="text-sm font-bold text-text-main">Poslednje Ture</div>
-                        <div className="h-6 px-3 bg-brand-500 hover:bg-brand-400 rounded text-black text-[10px] font-bold flex items-center uppercase tracking-wide cursor-pointer transition-colors">
-                           + Nova Tura
+                        <div className="text-sm font-bold text-text-main opacity-0 animate-fade-in" style={{ animationDelay: '1.8s', animationFillMode: 'forwards' }}>
+                           Poslednje Ture
+                        </div>
+                        <div className="h-6 px-3 bg-brand-500 hover:bg-brand-400 rounded text-black text-[10px] font-bold flex items-center uppercase tracking-wide cursor-pointer transition-all duration-200 opacity-0 animate-fade-in hover:shadow-md hover:scale-105 relative overflow-hidden group" style={{ animationDelay: '1.9s', animationFillMode: 'forwards' }}>
+                           {/* Subtle glow effect */}
+                           <div className="absolute inset-0 bg-gradient-to-r from-brand-400/50 via-brand-500 to-brand-400/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                           <span className="relative z-10">+ Nova Tura</span>
                         </div>
                      </div>
                      
-                     {/* Detailed Table Header */}
-                     <div className="grid grid-cols-12 gap-4 px-3 py-2 border-b border-border text-[9px] font-bold text-text-muted uppercase tracking-widest">
+                     {/* Animated Detailed Table Header */}
+                     <div className="grid grid-cols-12 gap-4 px-3 py-2 border-b border-border text-[9px] font-bold text-text-muted uppercase tracking-widest opacity-0 animate-fade-in" style={{ animationDelay: '2s', animationFillMode: 'forwards' }}>
                         <div className="col-span-4">Relacija</div>
                         <div className="col-span-2">Datum</div>
                         <div className="col-span-3">Vozilo</div>
@@ -219,25 +335,29 @@ export const Landing = () => {
                         <div className="col-span-1 text-right">Status</div>
                      </div>
 
-                     {/* Mock List Items */}
+                     {/* Clean Mock List Items */}
                      <div className="space-y-2 mt-2">
                         {[
-                           { from: 'Beograd', to: 'Minhen', date: 'Danas', type: 'Cerada', price: '1,200 €', status: 'active' },
-                           { from: 'Zagreb', to: 'Milano', date: 'Sutra', type: 'Hladnjača', price: '950 €', status: 'pending' },
-                           { from: 'Niš', to: 'Ljubljana', date: '20. Okt', type: 'Mega', price: 'Na upit', status: 'active' },
+                           { from: 'Beograd', to: 'Minhen', date: 'Danas', type: 'Cerada', price: '1,200 €', status: 'active', delay: '2s' },
+                           { from: 'Zagreb', to: 'Milano', date: 'Sutra', type: 'Hladnjača', price: '950 €', status: 'pending', delay: '2.3s' },
+                           { from: 'Niš', to: 'Ljubljana', date: '20. Okt', type: 'Mega', price: 'Na upit', status: 'active', delay: '2.6s' },
                         ].map((row, i) => (
-                           <div key={i} className="grid grid-cols-12 gap-4 items-center h-10 px-3 rounded border border-border bg-surface/50 hover:bg-surfaceHighlight transition-colors group cursor-pointer">
+                           <div key={i} className="grid grid-cols-12 gap-4 items-center h-10 px-3 rounded-lg border border-border bg-surface/50 transition-all duration-300 cursor-pointer opacity-0 animate-fade-in hover:bg-surfaceHighlight hover:shadow-sm group" style={{ animationDelay: row.delay, animationFillMode: 'forwards' }}>
                               <div className="col-span-4 flex items-center gap-2 text-xs text-text-main font-medium">
-                                 <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                                 <span className={`w-1.5 h-1.5 rounded-full ${row.status === 'active' ? 'bg-brand-500' : 'bg-amber-500'}`}></span>
                                  {row.from} <span className="text-text-muted">→</span> {row.to}
                               </div>
                               <div className="col-span-2 text-[10px] text-text-muted">{row.date}</div>
                               <div className="col-span-3">
-                                 <span className="bg-background text-text-muted px-1.5 py-0.5 rounded text-[9px] border border-border">{row.type}</span>
+                                 <span className="bg-background text-text-muted px-1.5 py-0.5 rounded text-[9px] border border-border">
+                                    {row.type}
+                                 </span>
                               </div>
-                              <div className="col-span-2 text-right text-xs font-mono font-bold text-text-main">{row.price}</div>
+                              <div className="col-span-2 text-right text-xs font-mono font-bold text-text-main">
+                                 {row.price}
+                              </div>
                               <div className="col-span-1 text-right">
-                                 <div className={`w-2 h-2 rounded-full ml-auto ${row.status === 'active' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'bg-amber-500'}`}></div>
+                                 <div className={`w-2 h-2 rounded-full ml-auto ${row.status === 'active' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
                               </div>
                            </div>
                         ))}
@@ -297,8 +417,8 @@ export const Landing = () => {
                
                {/* Large Card 1: Dispatcher Tool - 3D Glass Stack */}
                <Card className="p-0 overflow-hidden bg-background border-border h-[420px] relative group hover:border-brand-500/30 perspective-1000">
-                  {/* Content Container - Fixed to Top-Left */}
-                  <div className="absolute top-8 left-8 z-20 pointer-events-none max-w-[280px]">
+                  {/* Content Container - Fixed to Top-Left with better spacing */}
+                  <div className="absolute top-8 left-8 z-20 pointer-events-none max-w-[240px]">
                      <h3 className="text-xl font-bold text-text-main mb-2">Komandni centar za dispečere</h3>
                      <p className="text-text-muted text-sm leading-relaxed">Zamenite Excel tabele i Viber grupe jednim inteligentnim interfejsom.</p>
                      <div className="mt-6 pointer-events-auto">
@@ -308,8 +428,8 @@ export const Landing = () => {
                      </div>
                   </div>
                   
-                  {/* 3D Visual - Absolute Positioned to Bottom-Right */}
-                  <div className="absolute top-[25%] -right-8 w-[85%] md:w-[70%] h-full transform-style-3d rotate-y-[-12deg] rotate-x-[5deg] group-hover:rotate-y-0 group-hover:rotate-x-0 transition-all duration-700 ease-out z-10">
+                  {/* 3D Visual - Better positioned to avoid text overlap */}
+                  <div className="absolute top-[40%] -right-8 w-[75%] md:w-[65%] h-[55%] transform-style-3d rotate-y-[-12deg] rotate-x-[5deg] group-hover:rotate-y-0 group-hover:rotate-x-0 transition-all duration-700 ease-out z-10">
                      {/* Card 1 */}
                      <div className="absolute top-0 w-full bg-surface border border-border rounded-tl-xl shadow-2xl p-4 flex gap-3 opacity-100 z-30 translate-x-4">
                         <div className="w-8 h-8 rounded bg-brand-500/10 flex items-center justify-center text-brand-500"><Truck className="h-4 w-4"/></div>
@@ -338,82 +458,147 @@ export const Landing = () => {
                   </div>
                </Card>
 
-               {/* Large Card 2: Network - Holographic Plane */}
+               {/* Large Card 2: Smart Matching Engine */}
                <Card className="p-0 overflow-hidden bg-background border-border h-[420px] relative group hover:border-brand-500/30">
-                  {/* Text Container - Protected by Gradient */}
-                  <div className="absolute top-0 left-0 w-full p-8 z-20 pointer-events-none bg-gradient-to-b from-background via-background/80 to-transparent">
-                     <h3 className="text-xl font-bold text-text-main mb-2">Mreža od poverenja</h3>
-                     <p className="text-text-muted text-sm leading-relaxed max-w-[280px]">Povežite se sa preko 2,000 verifikovanih firmi širom Balkana i EU.</p>
+                  {/* Text Container - Fixed positioning */}
+                  <div className="absolute top-0 left-0 w-full p-8 z-20 pointer-events-none">
+                     <h3 className="text-xl font-bold text-text-main mb-2">Pametno povezivanje</h3>
+                     <p className="text-text-muted text-sm leading-relaxed max-w-[280px]">Naš algoritam automatski pronalazi savršeno poklapanje između tereta i vozila.</p>
                      <div className="flex gap-2 mt-6 pointer-events-auto">
-                        <Button size="sm" variant="outline" className="uppercase text-[10px] tracking-widest backdrop-blur-md bg-background/50">Pretraži Firme ↗</Button>
+                        <Button size="sm" variant="outline" className="uppercase text-[10px] tracking-widest">Kako funkcioniše ↗</Button>
                      </div>
                   </div>
                   
-                  {/* Massive Graphic - Full Coverage */}
-                  <div className="absolute bottom-0 left-0 w-full h-[60%] z-10">
-                     <svg className="w-full h-full" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet">
-                        {/* Background Perspective Grid - hidden in light mode via css variable */}
-                        <g opacity="0.1" stroke="var(--grid-line-color)" strokeWidth="1">
-                           {[0, 100, 200, 300, 400, 500, 600].map(x => (
-                              <line key={`v${x}`} x1={300} y1={0} x2={x} y2={400} />
-                           ))}
-                           {[400, 350, 310, 280, 260, 240, 220].map((y, i) => (
-                              <line key={`h${i}`} x1={0} y1={y} x2={600} y2={y} opacity={1 - i * 0.1} />
-                           ))}
-                        </g>
-
-                        {/* Connection Network */}
-                        <g>
-                           {[
-                              { start: [300, 280], end: [100, 150], d: '0s' },
-                              { start: [300, 280], end: [500, 150], d: '1.2s' },
-                              { start: [300, 280], end: [200, 120], d: '2.5s' },
-                              { start: [300, 280], end: [400, 120], d: '0.5s' },
-                              { start: [300, 280], end: [300, 100], d: '3s' },
-                           ].map((line, i) => (
-                              <g key={i}>
-                                 {/* Static Line */}
-                                 <line 
-                                    x1={line.start[0]} y1={line.start[1]} 
-                                    x2={line.end[0]} y2={line.end[1]} 
-                                    stroke="var(--border)" 
-                                    strokeWidth="1" 
-                                    strokeDasharray="4 4" 
-                                 />
-                                 {/* Moving Packet - Hardcoded Green */}
-                                 <circle r="3" fill="#22C55E">
-                                    <animateMotion 
-                                       dur="4s" 
-                                       repeatCount="indefinite"
-                                       path={`M${line.start[0]},${line.start[1]} L${line.end[0]},${line.end[1]}`}
-                                       keyPoints="0;1"
-                                       keyTimes="0;1"
-                                       calcMode="linear"
-                                       begin={line.d}
-                                    />
-                                    <animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite" begin={line.d} />
-                                 </circle>
-                                 {/* Target Node - Clean Circle without beams */}
-                                 <g transform={`translate(${line.end[0]}, ${line.end[1]})`}>
-                                    <circle r="6" fill="var(--surface)" stroke="var(--brand-500)" strokeWidth="2">
-                                       <animate attributeName="r" values="6;8;6" dur="3s" repeatCount="indefinite" begin={line.d} />
-                                       <animate attributeName="stroke-opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite" begin={line.d} />
-                                    </circle>
-                                 </g>
-                              </g>
-                           ))}
-                        </g>
-
-                        {/* Central Hub (Shield) - Centered with Flexbox in ForeignObject */}
-                        <foreignObject x="270" y="250" width="60" height="60">
-                           <div className="flex items-center justify-center w-full h-full relative">
-                              <div className="absolute inset-0 rounded-full bg-brand-500/10 animate-ping"></div>
-                              <div className="absolute inset-2 rounded-full border border-border bg-surface flex items-center justify-center z-10">
-                                 <ShieldCheck className="w-6 h-6 text-brand-500" />
+                  {/* Matching Animation - Positioned in bottom area */}
+                  <div className="absolute bottom-0 left-0 w-full h-[60%] flex items-center justify-center z-10 p-6">
+                     <div className="relative w-full max-w-md">
+                        
+                        {/* Success Notification */}
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 animate-fade-in" style={{ animationDelay: '2s', animationFillMode: 'forwards' }}>
+                           <div className="bg-brand-500/10 border border-brand-500/30 rounded-lg px-4 py-2 backdrop-blur-sm">
+                              <div className="text-[10px] font-bold text-brand-500 uppercase tracking-wider text-center">
+                                 NOVO POKLAPANJE
                               </div>
                            </div>
-                        </foreignObject>
-                     </svg>
+                        </div>
+                        
+                        {/* Clean Matching Flow */}
+                        <div className="space-y-6">
+                           
+                           {/* Match Example 1 */}
+                           <div className="flex items-center justify-between opacity-0 animate-fade-in" style={{ animationDelay: '0s', animationFillMode: 'forwards' }}>
+                              <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 rounded-lg bg-brand-500/10 border border-brand-500/30 flex items-center justify-center">
+                                    <Truck className="h-5 w-5 text-brand-500" />
+                                 </div>
+                                 <div>
+                                    <div className="text-xs font-bold text-brand-500">DOSTUPAN</div>
+                                    <div className="text-[10px] text-text-muted">Cerada 24t</div>
+                                 </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                 <div className="w-8 h-px bg-brand-500/50"></div>
+                                 <div className="w-6 h-6 rounded-full bg-brand-500/20 border border-brand-500 flex items-center justify-center">
+                                    <Zap className="h-3 w-3 text-brand-500" />
+                                 </div>
+                                 <div className="w-8 h-px bg-brand-500/50"></div>
+                              </div>
+                              
+                              <div className="flex items-center gap-3">
+                                 <div>
+                                    <div className="text-xs font-bold text-brand-500 text-right">POKLAPANJE</div>
+                                    <div className="text-[10px] text-text-muted text-right">Beograd → Berlin</div>
+                                 </div>
+                                 <div className="w-10 h-10 rounded-lg bg-brand-500/10 border border-brand-500/30 flex items-center justify-center">
+                                    <Package className="h-5 w-5 text-brand-500" />
+                                 </div>
+                              </div>
+                           </div>
+
+                           {/* Match Example 2 */}
+                           <div className="flex items-center justify-between opacity-0 animate-fade-in" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
+                              <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center">
+                                    <Truck className="h-5 w-5 text-text-muted" />
+                                 </div>
+                                 <div>
+                                    <div className="text-xs font-bold text-text-muted">ZAUZET</div>
+                                    <div className="text-[10px] text-text-muted">Hladnjača 18t</div>
+                                 </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                 <div className="w-8 h-px bg-border"></div>
+                                 <div className="w-6 h-6 rounded-full bg-surface border border-border flex items-center justify-center">
+                                    <div className="w-2 h-2 rounded-full bg-text-muted"></div>
+                                 </div>
+                                 <div className="w-8 h-px bg-border"></div>
+                              </div>
+                              
+                              <div className="flex items-center gap-3">
+                                 <div>
+                                    <div className="text-xs font-bold text-text-muted text-right">ČEKA</div>
+                                    <div className="text-[10px] text-text-muted text-right">Zagreb → Milano</div>
+                                 </div>
+                                 <div className="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center">
+                                    <Package className="h-5 w-5 text-text-muted" />
+                                 </div>
+                              </div>
+                           </div>
+
+                           {/* Match Example 3 */}
+                           <div className="flex items-center justify-between opacity-0 animate-fade-in" style={{ animationDelay: '1.5s', animationFillMode: 'forwards' }}>
+                              <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 rounded-lg bg-brand-500/10 border border-brand-500/30 flex items-center justify-center">
+                                    <Truck className="h-5 w-5 text-brand-500" />
+                                 </div>
+                                 <div>
+                                    <div className="text-xs font-bold text-brand-500">DOSTUPAN</div>
+                                    <div className="text-[10px] text-text-muted">Mega 25t</div>
+                                 </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                 <div className="w-8 h-px bg-brand-500/50"></div>
+                                 <div className="w-6 h-6 rounded-full bg-brand-500/20 border border-brand-500 flex items-center justify-center">
+                                    <Zap className="h-3 w-3 text-brand-500" />
+                                 </div>
+                                 <div className="w-8 h-px bg-brand-500/50"></div>
+                              </div>
+                              
+                              <div className="flex items-center gap-3">
+                                 <div>
+                                    <div className="text-xs font-bold text-brand-500 text-right">POKLAPANJE</div>
+                                    <div className="text-[10px] text-text-muted text-right">Niš → Budimpešta</div>
+                                 </div>
+                                 <div className="w-10 h-10 rounded-lg bg-brand-500/10 border border-brand-500/30 flex items-center justify-center">
+                                    <Package className="h-5 w-5 text-brand-500" />
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  {/* Bottom Stats Panel */}
+                  <div className="absolute bottom-0 left-0 w-full p-6 z-20">
+                     <div className="bg-surface/90 backdrop-blur-sm border border-border rounded-lg p-4 shadow-lg transition-all duration-300 hover:shadow-xl">
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                           <div>
+                              <div className="text-xl font-bold text-brand-500 font-mono">98.5%</div>
+                              <div className="text-[9px] text-text-muted uppercase tracking-wider">Uspešnost</div>
+                           </div>
+                           <div>
+                              <div className="text-xl font-bold text-text-main font-mono">2.3s</div>
+                              <div className="text-[9px] text-text-muted uppercase tracking-wider">Prosečno vreme</div>
+                           </div>
+                           <div>
+                              <div className="text-xl font-bold text-text-main font-mono">24/7</div>
+                              <div className="text-[9px] text-text-muted uppercase tracking-wider">Aktivno</div>
+                           </div>
+                        </div>
+                     </div>
                   </div>
                </Card>
             </div>
@@ -462,35 +647,59 @@ export const Landing = () => {
                   </div>
                </Card>
 
-               {/* Small Card 4: Route Estimation (SVG Precision) */}
+               {/* Small Card 4: Simple Message Flow - Ultra Clean */}
                <Card className="p-6 bg-background border-border min-h-[300px] flex flex-col justify-between hover:border-brand-500/30 transition-colors group">
-                   <div className="bg-surface border border-border rounded-lg h-36 mb-6 flex items-center justify-center relative overflow-hidden">
-                     <svg className="w-full h-full p-4" viewBox="0 0 200 100">
-                        {/* Path Line */}
-                        <path d="M 20 50 Q 100 20 180 50" fill="none" stroke="var(--border)" strokeWidth="2" strokeLinecap="round" />
-                        
-                        {/* Animated Path */}
-                        <path d="M 20 50 Q 100 20 180 50" fill="none" stroke="var(--brand-500)" strokeWidth="2" strokeLinecap="round" className="animate-[draw-loop_3s_ease-in-out_infinite]" strokeDasharray="200" strokeDashoffset="200" />
-                        
-                        {/* Start Dot */}
-                        <circle cx="20" cy="50" r="4" fill="var(--surface)" stroke="var(--text-main)" strokeWidth="2" />
-                        
-                        {/* End Dot */}
-                        <circle cx="180" cy="50" r="4" fill="var(--brand-500)" />
-                        
-                        {/* Drone/Vehicle moving along path */}
-                        <circle r="4" fill="var(--text-main)">
-                           <animateMotion repeatCount="indefinite" dur="3s" path="M 20 50 Q 100 20 180 50" keyPoints="0;1;1" keyTimes="0;0.5;1" calcMode="linear" />
-                        </circle>
-                     </svg>
+                   <div className="bg-surface border border-border rounded-lg h-36 mb-6 relative overflow-hidden flex items-center justify-center">
                      
-                     <div className="bg-background border border-border px-2 py-1 rounded text-[10px] font-mono text-text-main absolute top-2 right-2">
-                        1,240 km
+                     {/* Simple Message Bubbles */}
+                     <div className="flex flex-col gap-3 items-center">
+                        
+                        {/* Message 1 - Incoming */}
+                        <div className="flex items-center gap-2 opacity-0 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
+                           <div className="w-6 h-6 rounded-full bg-surfaceHighlight flex items-center justify-center">
+                              <div className="w-2 h-2 rounded-full bg-text-muted"></div>
+                           </div>
+                           <div className="bg-surfaceHighlight rounded-lg px-3 py-1.5 max-w-[120px]">
+                              <div className="h-1 w-16 bg-text-muted/30 rounded mb-1"></div>
+                              <div className="h-1 w-12 bg-text-muted/20 rounded"></div>
+                           </div>
+                        </div>
+                        
+                        {/* Message 2 - Outgoing */}
+                        <div className="flex items-center gap-2 flex-row-reverse opacity-0 animate-fade-in" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
+                           <div className="w-6 h-6 rounded-full bg-brand-500/10 flex items-center justify-center">
+                              <div className="w-2 h-2 rounded-full bg-brand-500"></div>
+                           </div>
+                           <div className="bg-brand-500/10 rounded-lg px-3 py-1.5 max-w-[120px]">
+                              <div className="h-1 w-14 bg-brand-500/30 rounded mb-1"></div>
+                              <div className="h-1 w-10 bg-brand-500/20 rounded"></div>
+                           </div>
+                        </div>
+                        
+                        {/* Message 3 - Incoming */}
+                        <div className="flex items-center gap-2 opacity-0 animate-fade-in" style={{ animationDelay: '1.5s', animationFillMode: 'forwards' }}>
+                           <div className="w-6 h-6 rounded-full bg-surfaceHighlight flex items-center justify-center">
+                              <div className="w-2 h-2 rounded-full bg-text-muted"></div>
+                           </div>
+                           <div className="bg-surfaceHighlight rounded-lg px-3 py-1.5 max-w-[120px]">
+                              <div className="h-1 w-18 bg-text-muted/30 rounded mb-1"></div>
+                              <div className="h-1 w-8 bg-text-muted/20 rounded"></div>
+                           </div>
+                        </div>
+                     </div>
+                     
+                     {/* Simple typing indicator */}
+                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 animate-fade-in" style={{ animationDelay: '2s', animationFillMode: 'forwards' }}>
+                        <div className="flex gap-1">
+                           <div className="w-1 h-1 bg-brand-500 rounded-full animate-pulse"></div>
+                           <div className="w-1 h-1 bg-brand-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                           <div className="w-1 h-1 bg-brand-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                        </div>
                      </div>
                   </div>
                   <div>
-                     <h4 className="text-text-main font-bold mb-1">Pametno Rutiranje</h4>
-                     <p className="text-xs text-text-muted">Precizna kalkulacija rute i troškova.</p>
+                     <h4 className="text-text-main font-bold mb-1">Direktna komunikacija</h4>
+                     <p className="text-xs text-text-muted">Razgovarajte direktno bez posrednika.</p>
                   </div>
                </Card>
 
@@ -580,86 +789,304 @@ export const Landing = () => {
                      
                      {/* Visual 0: Notifications */}
                      {activeFeature === 0 && (
-                        <div className="w-full max-w-xs space-y-4 animate-slide-up">
-                           {[1, 2].map((i) => (
-                             <div key={i} className="bg-background/80 backdrop-blur border border-border rounded-xl p-4 shadow-lg hover:border-brand-500/30 transition-colors cursor-pointer">
-                                <div className="flex justify-between items-start mb-2">
-                                   <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 rounded bg-brand-500/20 flex items-center justify-center">
-                                         <Bell className="h-3 w-3 text-brand-500" />
-                                      </div>
-                                      <span className="text-xs font-bold text-text-main">Nova Tura</span>
-                                   </div>
-                                   <span className="text-[10px] text-text-muted">pre 2 min</span>
-                                </div>
-                                <p className="text-sm font-medium text-text-main">Pronađena tura: Beograd <span className="text-text-muted">→</span> Beč</p>
-                                <p className="text-xs text-text-muted mt-1">Cerada • 24t • 1,200 €</p>
-                             </div>
-                           ))}
-                             <div className="bg-background/80 backdrop-blur border border-border rounded-xl p-4 shadow-lg flex items-center gap-3 opacity-50">
-                                <div className="w-8 h-8 rounded-full bg-surfaceHighlight animate-pulse"></div>
-                                <div className="flex-1 space-y-2">
-                                   <div className="h-2 w-20 bg-surfaceHighlight rounded"></div>
-                                   <div className="h-2 w-32 bg-surfaceHighlight rounded"></div>
-                                </div>
-                             </div>
+                        <div className="w-full max-w-sm space-y-3 animate-slide-up">
+                           {/* Notification 1 - New Load Match */}
+                           <div className="bg-surface border border-border rounded-lg p-4 hover:border-brand-500/20 transition-all cursor-pointer group">
+                              <div className="flex items-start gap-3">
+                                 <div className="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-500/15 transition-colors">
+                                    <Bell className="h-4 w-4 text-brand-500" />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between mb-1">
+                                       <span className="text-xs font-bold text-text-main">Novo poklapanje</span>
+                                       <span className="text-[10px] text-text-muted">pre 2 min</span>
+                                    </div>
+                                    <p className="text-sm text-text-main mb-1">Beograd → Beč</p>
+                                    <div className="flex items-center gap-2 text-[10px] text-text-muted">
+                                       <span>Cerada</span>
+                                       <span>•</span>
+                                       <span>24t</span>
+                                       <span>•</span>
+                                       <span className="text-text-main font-medium">1,200 €</span>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           
+                           {/* Notification 2 - Price Alert */}
+                           <div className="bg-surface border border-border rounded-lg p-4 hover:border-brand-500/20 transition-all cursor-pointer group">
+                              <div className="flex items-start gap-3">
+                                 <div className="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-500/15 transition-colors">
+                                    <TrendingUp className="h-4 w-4 text-brand-500" />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between mb-1">
+                                       <span className="text-xs font-bold text-text-main">Promena cene</span>
+                                       <span className="text-[10px] text-text-muted">pre 15 min</span>
+                                    </div>
+                                    <p className="text-sm text-text-main mb-1">Zagreb → Milano</p>
+                                    <div className="flex items-center gap-2 text-[10px] text-text-muted">
+                                       <span>Hladnjača</span>
+                                       <span>•</span>
+                                       <span className="text-brand-500 font-medium">+150 €</span>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                           
+                           {/* Loading notification */}
+                           <div className="bg-surface border border-border rounded-lg p-4 opacity-40">
+                              <div className="flex items-start gap-3">
+                                 <div className="w-8 h-8 rounded-lg bg-surfaceHighlight animate-pulse flex-shrink-0"></div>
+                                 <div className="flex-1 space-y-2">
+                                    <div className="h-2 w-24 bg-surfaceHighlight rounded animate-pulse"></div>
+                                    <div className="h-2 w-32 bg-surfaceHighlight rounded animate-pulse"></div>
+                                 </div>
+                              </div>
+                           </div>
                         </div>
                      )}
 
-                     {/* Visual 1: Matching */}
+                     {/* Visual 1: Fast Matching Connection */}
                      {activeFeature === 1 && (
-                        <div className="relative w-64 h-64 animate-fade-in">
-                           {/* Center Node (Load) */}
-                           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-surface border border-border rounded-full flex items-center justify-center z-20 shadow-glow">
-                              <Package className="text-text-main h-8 w-8" />
-                              <div className="absolute -bottom-6 text-[10px] font-bold text-white bg-black/50 px-2 py-0.5 rounded">TERET</div>
+                        <div className="relative w-full h-full flex items-center justify-center">
+                           
+                           {/* Simple Horizontal Layout */}
+                           <div className="flex items-center justify-between w-full max-w-md px-4">
+                              
+                              {/* Left: Truck */}
+                              <div className="flex flex-col items-center animate-fade-in">
+                                 <div className="w-16 h-16 rounded-xl bg-surface border border-border flex items-center justify-center mb-2">
+                                    <Truck className="h-8 w-8 text-brand-500" />
+                                 </div>
+                                 <div className="text-center">
+                                    <div className="text-xs font-bold text-text-main">TransLogistic</div>
+                                    <div className="text-[9px] text-text-muted uppercase tracking-wider">Prevoznik</div>
+                                 </div>
+                              </div>
+                              
+                              {/* Center: Connection */}
+                              <div className="flex-1 flex items-center justify-center mx-6">
+                                 <div className="relative w-full">
+                                    {/* Connection Line */}
+                                    <div className="h-px bg-brand-500/50 w-full"></div>
+                                    
+                                    {/* Center Icon */}
+                                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                                       <div className="w-10 h-10 rounded-lg bg-surface border border-brand-500/30 flex items-center justify-center">
+                                          <Zap className="h-5 w-5 text-brand-500" />
+                                       </div>
+                                    </div>
+                                    
+                                    {/* Animated Dot */}
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-brand-500 rounded-full">
+                                       <div className="absolute inset-0 bg-brand-500 rounded-full animate-ping"></div>
+                                    </div>
+                                 </div>
+                              </div>
+                              
+                              {/* Right: Package */}
+                              <div className="flex flex-col items-center animate-fade-in">
+                                 <div className="w-16 h-16 rounded-xl bg-surface border border-border flex items-center justify-center mb-2">
+                                    <Package className="h-8 w-8 text-brand-500" />
+                                 </div>
+                                 <div className="text-center">
+                                    <div className="text-xs font-bold text-text-main">MegaTrade</div>
+                                    <div className="text-[9px] text-text-muted uppercase tracking-wider">Pošiljalac</div>
+                                 </div>
+                              </div>
                            </div>
                            
-                           {/* Orbiting Nodes (Trucks) */}
-                           <div className="absolute inset-0 animate-spin-slow z-10">
-                              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 bg-surfaceHighlight rounded-full flex items-center justify-center border border-border">
-                                 <Truck className="h-5 w-5 text-text-muted" />
-                              </div>
-                              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-12 bg-brand-900/40 rounded-full flex items-center justify-center border border-brand-500/50 shadow-[0_0_15px_rgba(74,222,128,0.3)]">
-                                 <Truck className="h-5 w-5 text-brand-400" />
+                           {/* Success Badge */}
+                           <div className="absolute top-8 left-1/2 -translate-x-1/2">
+                              <div className="bg-brand-500/10 border border-brand-500/30 rounded-lg px-3 py-1.5">
+                                 <div className="text-[10px] font-bold text-brand-500 uppercase tracking-wider">
+                                    ✓ Podudaranje (98%)
+                                 </div>
                               </div>
                            </div>
                            
-                           {/* Connection Line - Static for stability */}
-                           <div className="absolute top-1/2 left-1/2 w-[2px] h-[90px] bg-gradient-to-b from-transparent via-brand-500/50 to-brand-500 origin-top transform translate-y-10 rounded-full animate-pulse"></div>
+                           {/* Route Info */}
+                           <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+                              <div className="text-center">
+                                 <div className="text-xs text-text-main font-medium">Beograd → Berlin</div>
+                                 <div className="text-[10px] text-text-muted">24t • Cerada</div>
+                              </div>
+                           </div>
                         </div>
                      )}
 
-                     {/* Visual 2: Analytics */}
+                     {/* Visual 2: Advanced Analytics & Market Intelligence */}
                      {activeFeature === 2 && (
-                        <div className="w-full h-full flex items-end justify-center gap-3 px-8 pb-4 animate-slide-up">
-                           {[40, 65, 30, 85, 55, 90, 45].map((h, i) => (
-                              <div key={i} className="flex-1 group relative">
-                                 <div 
-                                    className="w-full bg-surfaceHighlight rounded-t-sm hover:bg-brand-500 transition-all duration-300 relative overflow-hidden" 
-                                    style={{ height: `${h}%` }}
-                                 >
-                                   <div className="absolute bottom-0 left-0 w-full h-1/3 bg-background/10"></div>
-                                 </div>
-                                 {/* Tooltip */}
-                                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface text-text-main border border-border text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
-                                    {h * 12} €
+                        <div className="w-full h-full p-6 animate-fade-in relative overflow-hidden">
+                           {/* Background Grid */}
+                           <div className="absolute inset-0 bg-[linear-gradient(rgba(74,222,128,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(74,222,128,0.03)_1px,transparent_1px)] bg-[size:20px_20px] opacity-50"></div>
+                           
+                           {/* Price Chart Area */}
+                           <div className="relative h-48 mb-4">
+                              {/* Chart Background */}
+                              <div className="absolute inset-0 bg-surface/30 rounded-lg border border-border"></div>
+                              
+                              {/* Y-Axis Labels */}
+                              <div className="absolute left-2 top-0 h-full flex flex-col justify-between py-4 text-[8px] text-text-muted font-mono">
+                                 <span>€2000</span>
+                                 <span>€1500</span>
+                                 <span>€1000</span>
+                                 <span>€500</span>
+                              </div>
+                              
+                              {/* Animated Price Line */}
+                              <svg className="absolute inset-0 w-full h-full p-4 pl-8" viewBox="0 0 300 150">
+                                 {/* Grid Lines */}
+                                 <defs>
+                                    <linearGradient id="priceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                       <stop offset="0%" stopColor="rgb(74, 222, 128)" stopOpacity="0.3"/>
+                                       <stop offset="100%" stopColor="rgb(74, 222, 128)" stopOpacity="0.05"/>
+                                    </linearGradient>
+                                 </defs>
+                                 
+                                 {/* Horizontal Grid */}
+                                 {[37.5, 75, 112.5].map((y, i) => (
+                                    <line key={i} x1="0" y1={y} x2="300" y2={y} stroke="var(--border)" strokeWidth="0.5" opacity="0.3"/>
+                                 ))}
+                                 
+                                 {/* Price Area Fill */}
+                                 <path 
+                                    d="M 20 120 L 50 100 L 80 85 L 110 95 L 140 70 L 170 60 L 200 45 L 230 40 L 260 35 L 280 30 L 280 150 L 20 150 Z" 
+                                    fill="url(#priceGradient)" 
+                                    className="opacity-0 animate-fade-in" 
+                                    style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
+                                 />
+                                 
+                                 {/* Price Line */}
+                                 <path 
+                                    d="M 20 120 L 50 100 L 80 85 L 110 95 L 140 70 L 170 60 L 200 45 L 230 40 L 260 35 L 280 30" 
+                                    fill="none" 
+                                    stroke="rgb(74, 222, 128)" 
+                                    strokeWidth="2" 
+                                    strokeLinecap="round"
+                                    className="opacity-0 animate-fade-in"
+                                    style={{ 
+                                       animationDelay: '0.5s', 
+                                       animationFillMode: 'forwards',
+                                       strokeDasharray: '400',
+                                       strokeDashoffset: '400',
+                                       animation: 'fadeIn 0.8s ease-out 0.5s forwards, drawLine 1.5s ease-out 0.7s forwards'
+                                    }}
+                                 />
+                                 
+                                 {/* Data Points - Clean and Elegant */}
+                                 {[
+                                    {x: 50, y: 100, price: '€1,200'},
+                                    {x: 110, y: 95, price: '€1,250'},
+                                    {x: 170, y: 60, price: '€1,450'},
+                                    {x: 230, y: 40, price: '€1,650'},
+                                    {x: 280, y: 30, price: '€1,750'}
+                                 ].map((point, i) => (
+                                    <g key={i} className="opacity-0 animate-fade-in" style={{ animationDelay: `${0.3 + i * 0.05}s`, animationFillMode: 'forwards' }}>
+                                       {/* Elegant static glow */}
+                                       <defs>
+                                          <radialGradient id={`glow-${i}`} cx="50%" cy="50%" r="50%">
+                                             <stop offset="0%" stopColor="rgb(74, 222, 128)" stopOpacity="0.3"/>
+                                             <stop offset="70%" stopColor="rgb(74, 222, 128)" stopOpacity="0.1"/>
+                                             <stop offset="100%" stopColor="rgb(74, 222, 128)" stopOpacity="0"/>
+                                          </radialGradient>
+                                       </defs>
+                                       
+                                       {/* Subtle breathing glow - very gentle */}
+                                       <circle cx={point.x} cy={point.y} r="6" fill={`url(#glow-${i})`} className="animate-pulse" style={{ animationDuration: '4s', animationDelay: `${i * 0.5}s` }}/>
+                                       
+                                       {/* Main dot - no movement to prevent misalignment */}
+                                       <circle cx={point.x} cy={point.y} r="3" fill="rgb(74, 222, 128)" stroke="var(--background)" strokeWidth="1.5"/>
+                                       <circle cx={point.x} cy={point.y} r="1.5" fill="white" opacity="0.9"/>
+                                       
+                                       {/* Price tooltip on hover */}
+                                       <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                          <rect x={point.x - 15} y={point.y - 25} width="30" height="16" rx="4" fill="var(--surface)" stroke="var(--border)" strokeWidth="0.5"/>
+                                          <text x={point.x} y={point.y - 16} textAnchor="middle" fontSize="8" fill="var(--text-main)" fontFamily="monospace">{point.price}</text>
+                                       </g>
+                                    </g>
+                                 ))}
+                                 
+                                 {/* Single elegant data flow particle */}
+                                 <g className="opacity-40">
+                                    <circle r="1.2" fill="rgb(74, 222, 128)" opacity="0.8">
+                                       <animateMotion dur="12s" repeatCount="indefinite" path="M 20 120 L 50 100 L 80 85 L 110 95 L 140 70 L 170 60 L 200 45 L 230 40 L 260 35 L 280 30"/>
+                                    </circle>
+                                 </g>
+                              </svg>
+                              
+                              {/* Clean Trend Indicator */}
+                              <div className="absolute top-4 right-4 bg-brand-500/10 border border-brand-500/30 rounded-lg px-3 py-1 opacity-0 animate-fade-in hover:bg-brand-500/15 transition-all duration-300" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
+                                 <div className="flex items-center gap-2 text-[10px] font-bold text-brand-500">
+                                    <div className="w-2 h-2 bg-brand-500 rounded-full animate-pulse" style={{ animationDuration: '3s' }}></div>
+                                    ↗ +24% ovaj mesec
                                  </div>
                               </div>
-                           ))}
+                           </div>
+                           
+                           {/* Clean Statistics Cards */}
+                           <div className="grid grid-cols-3 gap-3">
+                              {[
+                                 { label: 'Prosečna Cena', value: '€1,420', change: '+12%', delay: '1s' },
+                                 { label: 'Broj Tura', value: '2,847', change: '+8%', delay: '1.1s' },
+                                 { label: 'Tržišni Udeo', value: '18.5%', change: '+3%', delay: '1.2s' }
+                              ].map((stat, i) => (
+                                 <div key={i} className="bg-surface/50 border border-border rounded-lg p-3 opacity-0 animate-fade-in relative overflow-hidden group hover:bg-surface/70 transition-all duration-300" style={{ animationDelay: stat.delay, animationFillMode: 'forwards' }}>
+                                    <div className="text-[8px] text-text-muted uppercase tracking-wider mb-1">{stat.label}</div>
+                                    <div className="text-sm font-bold text-text-main font-mono">{stat.value}</div>
+                                    <div className="text-[9px] text-brand-500 font-bold">{stat.change}</div>
+                                    
+                                    {/* Subtle glow on hover */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    
+                                    {/* Minimal activity indicator */}
+                                    <div className="absolute top-2 right-2 w-1 h-1 bg-brand-500 rounded-full animate-pulse opacity-60" style={{ animationDelay: `${2 + i * 0.5}s`, animationDuration: '4s' }}></div>
+                                 </div>
+                              ))}
+                           </div>
+                           
+                           {/* Clean Route Analysis */}
+                           <div className="mt-4 bg-surface/30 border border-border rounded-lg p-3 opacity-0 animate-fade-in relative overflow-hidden group hover:bg-surface/40 transition-all duration-300" style={{ animationDelay: '1.3s', animationFillMode: 'forwards' }}>
+                              <div className="text-[9px] text-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
+                                 <span>Najprofitabilnije Rute</span>
+                                 <div className="w-1 h-1 bg-brand-500 rounded-full animate-pulse" style={{ animationDuration: '4s' }}></div>
+                              </div>
+                              <div className="space-y-1">
+                                 {[
+                                    { route: 'Beograd → Berlin', profit: '€1,750', bar: '85%', color: 'bg-brand-500' },
+                                    { route: 'Zagreb → Milano', profit: '€1,420', bar: '65%', color: 'bg-brand-400' },
+                                    { route: 'Niš → Budimpešta', profit: '€1,180', bar: '45%', color: 'bg-brand-300' }
+                                 ].map((item, i) => (
+                                    <div key={i} className="flex items-center justify-between text-[8px] group/route hover:bg-surface/20 rounded px-1 py-0.5 transition-all duration-200">
+                                       <span className="text-text-main font-medium">{item.route}</span>
+                                       <div className="flex items-center gap-2">
+                                          <div className="w-12 h-1 bg-surfaceHighlight rounded-full overflow-hidden relative">
+                                             {/* Clean animated progress bar */}
+                                             <div className={`h-full ${item.color} rounded-full transition-all duration-1000 relative`} style={{ width: item.bar, animationDelay: `${1.5 + i * 0.1}s` }}>
+                                                {/* Subtle shimmer effect */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer" style={{ animationDelay: `${3 + i * 0.8}s`, animationDuration: '3s' }}></div>
+                                             </div>
+                                          </div>
+                                          <span className="text-brand-500 font-bold font-mono">{item.profit}</span>
+                                       </div>
+                                    </div>
+                                 ))}
+                              </div>
+                           </div>
                         </div>
                      )}
                   </div>
 
                   <div className="p-6 bg-surfaceHighlight/20 border-t border-border font-mono text-xs">
-                     {activeFeature === 0 && <div className="text-text-muted">> Poslato 3 email-a i 2 SMS poruke.</div>}
+                     {activeFeature === 0 && <div className="text-text-muted">&gt; Poslato 3 email-a i 2 SMS poruke.</div>}
                      {activeFeature === 1 && (
                         <>
                            <div className="text-brand-500 mb-2">✓ Podudaranje Pronađeno (98%)</div>
                            <div className="text-text-muted">Povezivanje prevoznika <span className="text-text-main">TransLogistic</span> sa pošiljaocem <span className="text-text-main">MegaTrade</span>...</div>
                         </>
                      )}
-                     {activeFeature === 2 && <div className="text-text-muted">> Rast profita od 24% u odnosu na prošli mesec.</div>}
+                     {activeFeature === 2 && <div className="text-text-muted">&gt; Rast profita od 24% u odnosu na prošli mesec.</div>}
                   </div>
                </div>
             </div>
@@ -993,56 +1420,115 @@ export const Landing = () => {
         </div>
       </section>
 
-      {/* New Section: Final CTA - Redesigned */}
-      <section className="py-24 px-6 bg-background">
-         <div className="mx-auto max-w-5xl">
-            <div className="relative rounded-[2.5rem] bg-[#0c0c0e] border border-white/10 overflow-hidden px-6 py-20 md:px-20 md:py-24 text-center shadow-2xl group">
-               {/* Background Grid */}
-               <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]"></div>
+      {/* New Section: Final CTA */}
+      <section className="py-24 px-6 bg-background relative overflow-hidden">
+         {/* Ambient background glow */}
+         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-brand-500/5 via-transparent to-transparent"></div>
+         
+         <div className="mx-auto max-w-5xl relative">
+            {/* Main CTA Card - Enhanced for light theme */}
+            <div className="relative rounded-2xl bg-stone-50 dark:bg-gradient-to-br dark:from-zinc-900/90 dark:to-zinc-950/90 border-2 border-stone-200 dark:border-white/10 overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-2xl hover:shadow-[0_8px_40px_rgba(0,0,0,0.06)] dark:hover:shadow-2xl hover:border-brand-500/40 dark:hover:border-brand-500/30 transition-all duration-300 group">
+               {/* Light theme gradient background */}
+               <div className="absolute inset-0 bg-gradient-to-br from-brand-50/50 via-stone-50 to-green-50/30 dark:opacity-0"></div>
                
-               {/* Animated Gradient Orbs */}
-               <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-500/10 blur-[100px] rounded-full group-hover:bg-brand-500/20 transition-colors duration-700"></div>
-               <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/10 blur-[80px] rounded-full"></div>
-
-               <div className="relative z-10">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-sm">
-                     <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                     <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Bez Obaveza</span>
+               {/* Animated gradient mesh background - only visible in dark mode */}
+               <div className="absolute inset-0 opacity-0 dark:opacity-30 group-hover:dark:opacity-40 transition-opacity duration-500">
+                  <div className="absolute top-0 -left-4 w-72 h-72 bg-brand-500 rounded-full mix-blend-multiply filter blur-[128px] animate-float"></div>
+                  <div className="absolute top-0 -right-4 w-72 h-72 bg-green-500 rounded-full mix-blend-multiply filter blur-[128px] animate-float" style={{ animationDelay: '2s' }}></div>
+                  <div className="absolute -bottom-8 left-20 w-72 h-72 bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] animate-float" style={{ animationDelay: '4s' }}></div>
+               </div>
+               
+               {/* Decorative elements for light theme - Enhanced */}
+               <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-brand-400/15 via-brand-300/10 to-transparent rounded-full blur-3xl dark:opacity-0 animate-float"></div>
+               <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-green-400/15 via-green-300/10 to-transparent rounded-full blur-3xl dark:opacity-0 animate-float" style={{ animationDelay: '3s' }}></div>
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-brand-100/20 to-transparent dark:opacity-0"></div>
+               
+               {/* Geometric shapes for light theme */}
+               <div className="absolute top-10 left-10 w-32 h-32 border-2 border-brand-200/30 rounded-2xl rotate-12 dark:opacity-0"></div>
+               <div className="absolute bottom-10 right-10 w-24 h-24 border-2 border-green-200/30 rounded-full dark:opacity-0"></div>
+               <div className="absolute top-1/3 right-20 w-16 h-16 bg-brand-100/40 rounded-lg rotate-45 dark:opacity-0"></div>
+               <div className="absolute bottom-1/3 left-16 w-20 h-20 bg-green-100/40 rounded-full dark:opacity-0"></div>
+               
+               {/* Dot pattern overlay - more visible in light */}
+               <div className="absolute inset-0 opacity-40 dark:opacity-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(34, 197, 94, 0.08) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+               
+               {/* Grid pattern overlay */}
+               <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_80%)]"></div>
+               
+               {/* Content */}
+               <div className="relative z-10 px-8 py-16 md:px-16 md:py-20 text-center">
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white dark:bg-white/5 border-2 border-brand-200 dark:border-white/10 mb-6 shadow-sm">
+                     <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                     </span>
+                     <span className="text-[10px] font-bold text-stone-600 dark:text-zinc-300 uppercase tracking-[0.2em]">Pridružite se danas</span>
                   </div>
                   
-                  <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-[1.1]">
-                     Pretvorite prazne kilometre u <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-600">čist profit.</span>
+                  {/* Heading */}
+                  <h2 className="text-4xl md:text-5xl font-bold text-stone-900 dark:text-white mb-4 tracking-tight leading-[1.1]">
+                     Prestanite da gubite novac na <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-green-600 dark:from-brand-400 dark:via-brand-500 dark:to-green-400">praznim kilometrima</span>.
                   </h2>
                   
-                  <p className="text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-                     Pridružite se mreži od 2,400+ prevoznika koji svakodnevno pronalaze ture brže nego ikada.
+                  {/* Subheading */}
+                  <p className="text-base md:text-lg text-stone-600 dark:text-zinc-400 mb-3 max-w-2xl mx-auto leading-relaxed">
+                     Svaki prazan kamion je izgubljena zarada. Naša platforma povezuje vaše vozače sa teretom u realnom vremenu.
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                     <Link to="/register" className="w-full sm:w-auto">
-                       <Button size="lg" variant="primary" className="w-full sm:w-auto h-14 px-8 text-sm font-bold shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_35px_rgba(34,197,94,0.6)] uppercase tracking-widest transition-all hover:scale-105">
-                         Registruj se besplatno
-                       </Button>
+                  {/* Stats row */}
+                  <div className="flex flex-wrap justify-center gap-4 mb-8 text-xs">
+                     <div className="flex items-center gap-1.5 text-stone-600 dark:text-zinc-500">
+                        <div className="w-1 h-1 rounded-full bg-brand-500"></div>
+                        <span><span className="text-stone-900 dark:text-white font-bold">2,400+</span> prevoznika</span>
+                     </div>
+                     <div className="flex items-center gap-1.5 text-stone-600 dark:text-zinc-500">
+                        <div className="w-1 h-1 rounded-full bg-brand-500"></div>
+                        <span><span className="text-stone-900 dark:text-white font-bold">15,000+</span> tura</span>
+                     </div>
+                     <div className="flex items-center gap-1.5 text-stone-600 dark:text-zinc-500">
+                        <div className="w-1 h-1 rounded-full bg-brand-500"></div>
+                        <span><span className="text-stone-900 dark:text-white font-bold">98.5%</span> uspešnost</span>
+                     </div>
+                  </div>
+                  
+                  {/* CTA Buttons */}
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
+                     <Link to="/register" className="w-full sm:w-auto group/btn">
+                       <button className="relative w-full sm:w-auto h-12 px-8 bg-brand-500 hover:bg-brand-600 text-white dark:text-black font-bold text-xs uppercase tracking-[0.2em] rounded-lg transition-all duration-200 shadow-[0_4px_14px_rgba(34,197,94,0.3)] hover:shadow-[0_6px_20px_rgba(34,197,94,0.4)] overflow-hidden">
+                         <span className="relative z-10 flex items-center justify-center gap-2">
+                           Počnite besplatno
+                           <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform duration-200" />
+                         </span>
+                       </button>
                      </Link>
-                     <Link to="/contact" className="w-full sm:w-auto">
-                       <Button size="lg" variant="white" className="w-full sm:w-auto h-14 px-8 text-sm font-bold uppercase tracking-widest hover:bg-zinc-100">
-                         Kontaktirajte nas
-                       </Button>
-                     </Link>
+                     <a href="#" className="w-full sm:w-auto group/btn2">
+                       <button className="w-full sm:w-auto h-12 px-8 bg-white dark:bg-white/5 hover:bg-stone-100 dark:hover:bg-white/10 border-2 border-stone-200 dark:border-white/10 text-stone-900 dark:text-white font-bold text-xs uppercase tracking-[0.2em] rounded-lg transition-all duration-200">
+                         <span className="flex items-center justify-center gap-2">
+                           Kontaktirajte nas
+                           <ArrowRight className="h-3.5 w-3.5 group-hover/btn2:translate-x-1 transition-transform duration-200" />
+                         </span>
+                       </button>
+                     </a>
                   </div>
 
-                  <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-4 text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                     <div className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-brand-500" />
-                        Popunite Kapacitete
+                  {/* Feature Pills */}
+                  <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
+                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-stone-200 dark:border-white/10 shadow-sm">
+                        <Check className="h-3 w-3 text-brand-500" strokeWidth={3} />
+                        <span className="text-[10px] font-medium text-stone-700 dark:text-zinc-300 uppercase tracking-wider">Bez posrednika</span>
                      </div>
-                     <div className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-brand-500" />
-                        Provereni Partneri
+                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-stone-200 dark:border-white/10 shadow-sm">
+                        <Check className="h-3 w-3 text-brand-500" strokeWidth={3} />
+                        <span className="text-[10px] font-medium text-stone-700 dark:text-zinc-300 uppercase tracking-wider">Instant notifikacije</span>
                      </div>
-                     <div className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-brand-500" />
-                        Automatizacija
+                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-stone-200 dark:border-white/10 shadow-sm">
+                        <Check className="h-3 w-3 text-brand-500" strokeWidth={3} />
+                        <span className="text-[10px] font-medium text-stone-700 dark:text-zinc-300 uppercase tracking-wider">Verifikovani partneri</span>
+                     </div>
+                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white/5 border border-stone-200 dark:border-white/10 shadow-sm">
+                        <Check className="h-3 w-3 text-brand-500" strokeWidth={3} />
+                        <span className="text-[10px] font-medium text-stone-700 dark:text-zinc-300 uppercase tracking-wider">24/7 podrška</span>
                      </div>
                   </div>
                </div>
@@ -1051,46 +1537,198 @@ export const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-surface border-t border-border pt-20 pb-12">
-        <div className="mx-auto max-w-7xl px-6 grid grid-cols-2 md:grid-cols-5 gap-12 mb-16">
-           <div className="col-span-2">
-              <div className="flex items-center gap-2 mb-6">
-                 <div className="h-6 w-6 bg-brand-400 rounded-sm flex items-center justify-center text-black">
-                   <ArrowLeftRight className="h-3.5 w-3.5" />
-                 </div>
-                 <span className="font-bold text-text-main text-lg">Nalozi</span>
+      <footer className="bg-surface border-t border-border relative overflow-hidden">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-20"></div>
+        
+        <div className="relative">
+          {/* Main Footer Content */}
+          <div className="mx-auto max-w-7xl px-6 pt-20 pb-12">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+              {/* Brand Column */}
+              <div className="md:col-span-4">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="relative h-10 w-10 flex items-center justify-center">
+                    {/* Modern geometric logo - interconnected nodes */}
+                    <svg viewBox="0 0 40 40" fill="none" className="w-full h-full">
+                      {/* Connection lines */}
+                      <path d="M8 20 L20 12 L32 20 L20 28 Z" className="stroke-brand-500" strokeWidth="2.5" fill="none" strokeLinejoin="round" />
+                      {/* Center node - larger */}
+                      <circle cx="20" cy="20" r="4" className="fill-brand-500" />
+                      {/* Outer nodes */}
+                      <circle cx="8" cy="20" r="3" className="fill-brand-400" />
+                      <circle cx="32" cy="20" r="3" className="fill-brand-400" />
+                      <circle cx="20" cy="12" r="3" className="fill-brand-400" />
+                      <circle cx="20" cy="28" r="3" className="fill-brand-400" />
+                    </svg>
+                  </div>
+                  <div className="flex items-baseline gap-0.5">
+                    <span className="text-2xl font-bold tracking-tight text-text-main">Teret</span>
+                    <span className="text-2xl font-bold tracking-tight text-brand-500">Link</span>
+                  </div>
+                </div>
+                <p className="text-sm text-text-muted leading-relaxed mb-6 max-w-xs">
+                  Moderna berza transporta koja povezuje prevoznike i špeditere širom Balkana i Evrope.
+                </p>
+                
+                {/* Status Badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-background border border-border mb-6">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Sistem aktivan</span>
+                </div>
+                
+                {/* Social Links */}
+                <div className="flex gap-3">
+                  <a href="#" className="h-9 w-9 rounded-lg bg-background border border-border flex items-center justify-center text-text-muted hover:text-text-main hover:border-brand-500/50 hover:bg-surfaceHighlight transition-all">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  </a>
+                  <a href="#" className="h-9 w-9 rounded-lg bg-background border border-border flex items-center justify-center text-text-muted hover:text-text-main hover:border-brand-500/50 hover:bg-surfaceHighlight transition-all">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                  </a>
+                  <a href="#" className="h-9 w-9 rounded-lg bg-background border border-border flex items-center justify-center text-text-muted hover:text-text-main hover:border-brand-500/50 hover:bg-surfaceHighlight transition-all">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  </a>
+                </div>
               </div>
-           </div>
-           <div>
-              <h4 className="font-bold text-text-main mb-6 text-xs uppercase tracking-widest">Platforma</h4>
-              <ul className="space-y-4 text-xs font-medium text-text-muted">
-                 <li><a href="#" className="hover:text-text-main transition-colors">Ture</a></li>
-                 <li><a href="#" className="hover:text-text-main transition-colors">Kamioni</a></li>
-                 <li><a href="#" className="hover:text-text-main transition-colors">Cenovnik</a></li>
-              </ul>
-           </div>
-           <div>
-              <h4 className="font-bold text-text-main mb-6 text-xs uppercase tracking-widest">Kompanija</h4>
-              <ul className="space-y-4 text-xs font-medium text-text-muted">
-                 <li><a href="#" className="hover:text-text-main transition-colors">O nama</a></li>
-                 <li><a href="#" className="hover:text-text-main transition-colors">Kontakt</a></li>
-                 <li><a href="#" className="hover:text-text-main transition-colors">Blog</a></li>
-              </ul>
-           </div>
-           <div>
-              <h4 className="font-bold text-text-main mb-6 text-xs uppercase tracking-widest">Pravno</h4>
-              <ul className="space-y-4 text-xs font-medium text-text-muted">
-                 <li><a href="#" className="hover:text-text-main transition-colors">Politika privatnosti</a></li>
-                 <li><a href="#" className="hover:text-text-main transition-colors">Uslovi korišćenja</a></li>
-              </ul>
-           </div>
-        </div>
-        <div className="mx-auto max-w-7xl px-6 text-xs font-medium text-text-muted flex justify-between items-center border-t border-border pt-8">
-           <div>© 2025 Nalozi za utovar. Sva prava zadržana.</div>
-           <div className="flex gap-6">
-              <a href="#" className="hover:text-text-main transition-colors">Facebook</a>
-              <a href="#" className="hover:text-text-main transition-colors">Instagram</a>
-           </div>
+              
+              {/* Links Columns */}
+              <div className="md:col-span-2">
+                <h4 className="font-bold text-text-main mb-6 text-[10px] uppercase tracking-[0.2em]">Platforma</h4>
+                <ul className="space-y-3">
+                  <li><Link to="/loads" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Berza tereta
+                  </Link></li>
+                  <li><Link to="/trucks" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Berza kamiona
+                  </Link></li>
+                  <li><Link to="/pricing" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Cenovnik
+                  </Link></li>
+                  <li><a href="#features" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Mogućnosti
+                  </a></li>
+                </ul>
+              </div>
+              
+              <div className="md:col-span-2">
+                <h4 className="font-bold text-text-main mb-6 text-[10px] uppercase tracking-[0.2em]">Kompanija</h4>
+                <ul className="space-y-3">
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    O nama
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Kontakt
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Blog
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Karijera
+                  </a></li>
+                </ul>
+              </div>
+              
+              <div className="md:col-span-2">
+                <h4 className="font-bold text-text-main mb-6 text-[10px] uppercase tracking-[0.2em]">Podrška</h4>
+                <ul className="space-y-3">
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Pomoć centar
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    API dokumentacija
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Status sistema
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Prijavi problem
+                  </a></li>
+                </ul>
+              </div>
+              
+              <div className="md:col-span-2">
+                <h4 className="font-bold text-text-main mb-6 text-[10px] uppercase tracking-[0.2em]">Pravno</h4>
+                <ul className="space-y-3">
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Politika privatnosti
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Uslovi korišćenja
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    Kolačići
+                  </a></li>
+                  <li><a href="#" className="text-sm text-text-muted hover:text-brand-500 transition-colors flex items-center gap-2 group">
+                    <span className="w-1 h-1 rounded-full bg-text-muted group-hover:bg-brand-500 transition-colors"></span>
+                    GDPR
+                  </a></li>
+                </ul>
+              </div>
+            </div>
+            
+            {/* Newsletter Section */}
+            <div className="mb-16 p-8 rounded-2xl bg-background border border-border relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-brand-500/5 to-transparent"></div>
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-text-main mb-2">Budite u toku sa novostima</h3>
+                  <p className="text-sm text-text-muted">Prijavite se za newsletter i dobijajte najnovije vesti iz sveta transporta.</p>
+                </div>
+                <div className="flex gap-3 w-full md:w-auto">
+                  <input 
+                    type="email" 
+                    placeholder="vas@email.com" 
+                    className="flex-1 md:w-64 h-11 px-4 rounded-lg bg-surface border border-border text-text-main text-sm placeholder:text-text-muted focus:outline-none focus:border-brand-500 transition-colors"
+                  />
+                  <button className="h-11 px-6 bg-brand-500 hover:bg-brand-400 text-black font-bold text-xs uppercase tracking-wider rounded-lg transition-colors whitespace-nowrap">
+                    Prijavi se
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Bottom Bar */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t border-border">
+              <div className="flex flex-wrap items-center gap-6 text-xs text-text-muted">
+                <span>© 2025 TeretLink.</span>
+                <span className="hidden md:block">•</span>
+                <span>Sva prava zadržana.</span>
+                <span className="hidden md:block">•</span>
+                <span className="flex items-center gap-2">
+                  <span className="w-1 h-1 rounded-full bg-green-500"></span>
+                  Napravljeno u Srbiji
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <select className="h-9 pl-3 pr-8 rounded-lg bg-background border border-border text-text-main text-xs font-medium focus:outline-none focus:border-brand-500 transition-colors cursor-pointer appearance-none bg-no-repeat bg-right" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A1AA' d='M6 9L1 4h10z'/%3E%3C/svg%3E\")", backgroundPosition: 'right 0.5rem center', backgroundSize: '12px' }}>
+                  <option>🇷🇸 SR</option>
+                  <option>🇬🇧 EN</option>
+                </select>
+                <button onClick={toggleTheme} className="h-9 w-9 rounded-lg bg-background border border-border flex items-center justify-center text-text-muted hover:text-text-main hover:border-brand-500/50 transition-all">
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
