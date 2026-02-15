@@ -53,6 +53,7 @@ export const Register = () => {
       setFormData({ 
         ...formData, 
         [name]: value,
+        personalPhoneCountryCode: phoneCode,
         companyPhoneCountryCode: phoneCode,
         faxCountryCode: phoneCode
       });
@@ -261,7 +262,18 @@ export const Register = () => {
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-6">
-                   <Input name="mobilePhone" label="Mobilni telefon" value={formData.mobilePhone} onChange={handleChange} placeholder="64 123 4567" />
+                   <div className="grid grid-cols-3 gap-2">
+                     <Select 
+                       name="personalPhoneCountryCode" 
+                       label="Kod" 
+                       value={formData.personalPhoneCountryCode} 
+                       onChange={handleChange}
+                       options={BALKAN_COUNTRIES.map(c => ({ value: c.phoneCode, label: c.phoneCode }))}
+                     />
+                     <div className="col-span-2">
+                       <Input name="mobilePhone" label="Mobilni telefon" value={formData.mobilePhone} onChange={handleChange} placeholder="64 123 4567" />
+                     </div>
+                   </div>
                    <div></div>
                 </div>
                 
