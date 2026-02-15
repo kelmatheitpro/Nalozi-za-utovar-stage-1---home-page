@@ -7,6 +7,7 @@ import { TermsOfService } from '../../components/TermsOfService';
 import { BALKAN_COUNTRIES, getPhoneCodeByCountry } from '../../utils/countries';
 import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 
+// Registration form with improved phone field layout
 export const Register = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
