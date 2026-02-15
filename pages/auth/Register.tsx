@@ -28,7 +28,8 @@ export const Register = () => {
     jobTitle: '',
     directPhone: '',
     mobilePhone: '',
-    personalPhoneCountryCode: '+381',
+    directPhoneCountryCode: '+381',
+    mobilePhoneCountryCode: '+381',
     
     // Company data
     companyName: '',
@@ -54,7 +55,8 @@ export const Register = () => {
       setFormData({ 
         ...formData, 
         [name]: value,
-        personalPhoneCountryCode: phoneCode,
+        directPhoneCountryCode: phoneCode,
+        mobilePhoneCountryCode: phoneCode,
         companyPhoneCountryCode: phoneCode,
         faxCountryCode: phoneCode
       });
@@ -90,7 +92,7 @@ export const Register = () => {
         jobTitle: formData.jobTitle,
         directPhone: formData.directPhone,
         mobilePhone: formData.mobilePhone,
-        phoneCountryCode: formData.personalPhoneCountryCode,
+        phoneCountryCode: formData.directPhoneCountryCode,
         company: {
           name: formData.companyName,
           registrationNumber: formData.registrationNumber,
@@ -251,9 +253,9 @@ export const Register = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                    <div className="grid grid-cols-3 gap-2">
                      <Select 
-                       name="personalPhoneCountryCode" 
+                       name="directPhoneCountryCode" 
                        label="Kod" 
-                       value={formData.personalPhoneCountryCode} 
+                       value={formData.directPhoneCountryCode} 
                        onChange={handleChange}
                        options={BALKAN_COUNTRIES.map(c => ({ value: c.phoneCode, label: c.phoneCode }))}
                      />
@@ -263,9 +265,9 @@ export const Register = () => {
                    </div>
                    <div className="grid grid-cols-3 gap-2">
                      <Select 
-                       name="personalPhoneCountryCode" 
+                       name="mobilePhoneCountryCode" 
                        label="Kod" 
-                       value={formData.personalPhoneCountryCode} 
+                       value={formData.mobilePhoneCountryCode} 
                        onChange={handleChange}
                        options={BALKAN_COUNTRIES.map(c => ({ value: c.phoneCode, label: c.phoneCode }))}
                      />
