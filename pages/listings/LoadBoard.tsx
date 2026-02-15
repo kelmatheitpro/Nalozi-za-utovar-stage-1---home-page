@@ -1,17 +1,88 @@
 import React, { useState } from 'react';
-import { useStore } from '../../context/StoreContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, Input, Button, Select, Badge } from '../../components/UIComponents';
 import { Filter, MapPin, Calendar, Phone, Lock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const LoadBoard = () => {
-  const { loads, canViewContact, currentUser } = useStore();
+  const { profile, canViewContact } = useAuth();
   const [filter, setFilter] = useState({ origin: '', destination: '', date: '' });
 
+  // Test data - will be replaced with real data from Supabase
+  const loads: any[] = [
+    {
+      id: 'test-load-1',
+      userId: 'test-user-1',
+      type: 'load',
+      companyName: 'Transport Srbija DOO',
+      originCountry: 'Serbia',
+      originCity: 'Belgrade',
+      destinationCountry: 'Germany',
+      destinationCity: 'Berlin',
+      dateFrom: '2024-01-15',
+      truckType: 'Cerada / Tautliner',
+      capacity: '24t, 33 palete',
+      price: 1200,
+      currency: 'EUR',
+      description: 'Hitna tura, potreban kamion sa ceradom',
+      views: 45,
+      inquiries: 3,
+      createdAt: new Date().toISOString(),
+      contactPhone: '+381 64 123 4567', // Pravi broj - samo za STANDARD/PRO korisnike
+    },
+    {
+      id: 'test-load-2',
+      userId: 'test-user-2',
+      type: 'load',
+      companyName: 'Balkan Logistics',
+      originCountry: 'Serbia',
+      originCity: 'Novi Sad',
+      destinationCountry: 'Austria',
+      destinationCity: 'Vienna',
+      dateFrom: '2024-01-16',
+      truckType: 'Hladnjača',
+      capacity: '20t',
+      price: 800,
+      currency: 'EUR',
+      description: 'Hrana, temperatura -18°C',
+      views: 23,
+      inquiries: 1,
+      createdAt: new Date().toISOString(),
+      contactPhone: '+381 65 987 6543',
+    },
+    {
+      id: 'test-load-3',
+      userId: 'test-user-3',
+      type: 'load',
+      companyName: 'Euro Trans',
+      originCountry: 'Serbia',
+      originCity: 'Kragujevac',
+      destinationCountry: 'Italy',
+      destinationCity: 'Milan',
+      dateFrom: '2024-01-17',
+      truckType: 'Mega',
+      capacity: '25t, 40 palete',
+      price: null,
+      currency: 'EUR',
+      description: 'Tekstil, potreban mega trailer',
+      views: 67,
+      inquiries: 5,
+      createdAt: new Date().toISOString(),
+      contactPhone: '+381 63 555 1234',
+    }
+  ];
+
   const filteredLoads = loads.filter(l => {
-    const matchOrigin = l.originCountry.toLowerCase().includes(filter.origin.toLowerCase()) || l.originCity.toLowerCase().includes(filter.origin.toLowerCase());
-    const matchDest = (l.destinationCountry?.toLowerCase() || '').includes(filter.destination.toLowerCase()) || (l.destinationCity?.toLowerCase() || '').includes(filter.destination.toLowerCase());
-    const matchDate = filter.date ? l.dateFrom.startsWith(filter.date) : true;
+    // If user is on free plan, don't apply filters (show all)
+    if (profile?.plan === 'free') return true;
+    
+    const matchOrigin = !filter.origin || 
+      l.originCountry?.toLowerCase().includes(filter.origin.toLowerCase()) || 
+      l.originCity?.toLowerCase().includes(filter.origin.toLowerCase());
+    const matchDest = !filter.destination || 
+      (l.destinationCountry?.toLowerCase() || '').includes(filter.destination.toLowerCase()) || 
+      (l.destinationCity?.toLowerCase() || '').includes(filter.destination.toLowerCase());
+    const matchDate = !filter.date || l.dateFrom?.startsWith(filter.date);
     return matchOrigin && matchDest && matchDate;
   });
 
@@ -19,37 +90,48 @@ export const LoadBoard = () => {
     <div className="space-y-6 animate-fade-in max-w-6xl mx-auto">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-text-main">Pretraga Tura</h1>
-        <Link to="/post-load"><Button>Objavi Turu</Button></Link>
+        {profile?.plan !== 'free' && (
+          <Link to="/post-load"><Button>Objavi Turu</Button></Link>
+        )}
       </div>
 
       {/* Filter Bar */}
       <Card className="p-5 sticky top-4 z-20 shadow-lg border-border ring-1 ring-border">
-        <div className="grid md:grid-cols-4 gap-4 items-end">
-          <Input 
-            label="Utovar" 
-            placeholder="Grad ili Država" 
-            value={filter.origin}
-            onChange={(e) => setFilter({...filter, origin: e.target.value})}
-            className="bg-surface"
-          />
-          <Input 
-            label="Istovar" 
-            placeholder="Grad ili Država" 
-            value={filter.destination}
-            onChange={(e) => setFilter({...filter, destination: e.target.value})}
-            className="bg-surface"
-          />
-          <Input 
-            label="Datum" 
-            type="date"
-            value={filter.date}
-            onChange={(e) => setFilter({...filter, date: e.target.value})}
-            className="bg-surface"
-          />
-          <Button variant="outline" className="w-full flex gap-2" onClick={() => setFilter({origin:'', destination:'', date:''})}>
-            <Filter className="h-4 w-4" /> Poništi filtere
-          </Button>
-        </div>
+        {profile?.plan === 'free' ? (
+          <div className="text-center py-4">
+            <p className="text-text-muted mb-3">Filteri su dostupni samo sa STANDARD ili PRO planom</p>
+            <Button onClick={() => window.location.href = '/pricing'} variant="primary" size="sm">
+              Upgrade Plan
+            </Button>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-4 gap-4 items-end">
+            <Input 
+              label="Utovar" 
+              placeholder="Grad ili Država" 
+              value={filter.origin}
+              onChange={(e) => setFilter({...filter, origin: e.target.value})}
+              className="bg-surface"
+            />
+            <Input 
+              label="Istovar" 
+              placeholder="Grad ili Država" 
+              value={filter.destination}
+              onChange={(e) => setFilter({...filter, destination: e.target.value})}
+              className="bg-surface"
+            />
+            <Input 
+              label="Datum" 
+              type="date"
+              value={filter.date}
+              onChange={(e) => setFilter({...filter, date: e.target.value})}
+              className="bg-surface"
+            />
+            <Button variant="outline" className="w-full flex gap-2" onClick={() => setFilter({origin:'', destination:'', date:''})}>
+              <Filter className="h-4 w-4" /> Poništi filtere
+            </Button>
+          </div>
+        )}
       </Card>
 
       {/* List */}
@@ -102,13 +184,17 @@ export const LoadBoard = () => {
                      
                      <div className="mt-4">
                        {hasAccess ? (
-                          <Button variant="secondary" className="w-full gap-2 font-semibold">
-                            <Phone className="h-4 w-4" /> Pozovi
+                          <Button 
+                            variant="secondary" 
+                            className="w-full gap-2 font-semibold"
+                            onClick={() => window.open(`tel:${load.contactPhone}`, '_self')}
+                          >
+                            <Phone className="h-4 w-4" /> {load.contactPhone}
                           </Button>
                        ) : (
                           <div className="relative overflow-hidden rounded-lg group cursor-not-allowed border border-border">
                              <div className="blur-[3px] bg-surface p-2.5 text-center text-text-muted select-none font-mono">
-                                +381 64 123 456
+                                *** *** ****
                              </div>
                              <div className="absolute inset-0 flex items-center justify-center bg-surface/60">
                                 <span className="flex items-center gap-1.5 text-xs font-semibold text-text-muted bg-surface px-3 py-1.5 rounded-full shadow-sm border border-border">

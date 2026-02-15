@@ -17,10 +17,20 @@ export enum SubscriptionPlan {
 }
 
 export enum CompanyCategory {
-  CARRIER = 'Transport Company / Carrier',
-  FORWARDER = 'Freight Forwarder',
-  TRADING = 'Trading Company',
-  OTHER = 'Other',
+  CARRIER = 'Transportna firma / Autoprevoznik',
+  FORWARDER = 'Špediterska firma / Špediter',
+  LOGISTICS = 'Transportna / Špediterska firma / Logistička firma',
+  MANUFACTURER = 'Trgovinska firma / Proizvođač',
+  IMPORTER_EXPORTER = 'Trgovinska firma / Uvoznik, izvoznik',
+  MOVING = 'Firme za prevoz i selidbe robe',
+  OTHER = 'Drugo',
+}
+
+export interface PersonalContact {
+  jobTitle?: string;
+  directPhone?: string;
+  mobilePhone?: string;
+  phoneCountryCode?: string;
 }
 
 export interface Company {
@@ -31,7 +41,11 @@ export interface Company {
   city: string;
   address: string;
   phone: string;
+  phoneCountryCode?: string;
   email: string;
+  fax?: string;
+  faxCountryCode?: string;
+  website?: string;
 }
 
 export interface User {
@@ -42,6 +56,12 @@ export interface User {
   status: UserStatus;
   plan: SubscriptionPlan;
   company?: Company;
+  rejectionReason?: string;
+  // Personal contact info
+  jobTitle?: string;
+  directPhone?: string;
+  mobilePhone?: string;
+  phoneCountryCode?: string;
 }
 
 export interface Listing {

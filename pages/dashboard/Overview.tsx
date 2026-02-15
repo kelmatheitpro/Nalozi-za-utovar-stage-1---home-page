@@ -1,46 +1,118 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useStore } from '../../context/StoreContext';
+import { useAuth } from '../../context/AuthContext';
 import { UserStatus } from '../../types';
 import { Card, Button, Badge } from '../../components/UIComponents';
-import { Package, Truck, Activity, Lock, TrendingUp, Plus, ArrowUpRight } from 'lucide-react';
+import { Package, Truck, Activity, Lock, TrendingUp, Plus, ArrowUpRight, Database } from 'lucide-react';
+import { SupabaseService } from '../../services/supabaseService';
 
 export const Overview = () => {
-  const { currentUser, loads, trucks } = useStore();
+  const { profile, isAdmin } = useAuth();
 
-  const myLoads = loads.filter(l => l.userId === currentUser?.id);
-  const myTrucks = trucks.filter(t => t.userId === currentUser?.id);
+  // For now, we'll use empty arrays since we haven't implemented the data fetching yet
+  const myLoads: any[] = [];
+  const myTrucks: any[] = [];
+
+  const handleAddTestData = async () => {
+    try {
+      await SupabaseService.addTestData();
+      alert('Test data added successfully! Check the loads and trucks pages.');
+    } catch (error) {
+      console.error('Error adding test data:', error);
+      alert('Error adding test data. Check console for details.');
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-10">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-text-main tracking-tight">Kontrolna Tabla</h1>
-          <p className="text-text-muted text-sm">Dobrodošli nazad, {currentUser?.name}</p>
+          <p className="text-text-muted text-sm">Dobrodošli nazad, {profile?.name || 'Korisnik'}</p>
         </div>
-        <div className="flex gap-3">
-           <Link to="/post-load">
-             <Button variant="primary" size="sm" className="gap-2 shadow-glow uppercase tracking-wide"><Plus className="h-3.5 w-3.5"/> Nova Tura</Button>
-           </Link>
-           <Link to="/post-truck">
-             <Button variant="outline" size="sm" className="gap-2 uppercase tracking-wide"><Plus className="h-3.5 w-3.5"/> Novi Kamion</Button>
-           </Link>
-        </div>
+        {profile?.plan !== 'free' && (
+          <div className="flex gap-3">
+             <Link to="/post-load">
+               <Button variant="primary" size="sm" className="gap-2 shadow-glow uppercase tracking-wide"><Plus className="h-3.5 w-3.5"/> Nova Tura</Button>
+             </Link>
+             <Link to="/post-truck">
+               <Button variant="outline" size="sm" className="gap-2 uppercase tracking-wide"><Plus className="h-3.5 w-3.5"/> Novi Kamion</Button>
+             </Link>
+          </div>
+        )}
+        {isAdmin && (
+          <Button 
+            onClick={handleAddTestData}
+            variant="outline" 
+            size="sm" 
+            className="gap-2 text-xs"
+          >
+            <Database className="h-3.5 w-3.5"/> Dodaj Test Podatke
+          </Button>
+        )}
       </div>
 
       {/* Status Alerts */}
-      {currentUser?.status === UserStatus.PENDING && (
+      {profile?.status === UserStatus.PENDING && (
         <div className="rounded-md border border-amber-500/50 bg-amber-500/10 p-4 flex gap-4 items-start">
            <div className="h-8 w-8 bg-amber-500/30 rounded flex items-center justify-center text-amber-500 shrink-0">
               <Lock className="h-4 w-4" />
            </div>
            <div>
              <h3 className="font-bold text-amber-500 text-sm">Nalog čeka odobrenje</h3>
-             <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-1 leading-relaxed max-w-2xl font-medium">
+             <p className="text-xs text-amber-600 dark:text-amber-300 mt-1 leading-relaxed max-w-2xl font-medium">
                Vaša dokumentacija se proverava. Kontakt detalji drugih korisnika su sakriveni dok nalog ne bude odobren.
              </p>
            </div>
         </div>
+      )}
+
+      {profile?.plan === 'free' && profile?.status === UserStatus.APPROVED && (
+        <div className="rounded-md border border-blue-500/50 bg-blue-500/10 p-4 flex gap-4 items-start">
+           <div className="h-8 w-8 bg-blue-500/30 rounded flex items-center justify-center text-blue-500 shrink-0">
+              <Lock className="h-4 w-4" />
+           </div>
+           <div>
+             <h3 className="font-bold text-blue-500 text-sm">FREE Plan - Ograničen pristup</h3>
+             <p className="text-xs text-blue-600 dark:text-blue-300 mt-1 leading-relaxed max-w-2xl font-medium">
+               Sa FREE planom možete samo da pregledate ture i kamione. Za objavljavanje i pristup kontaktima potreban je STANDARD ili PRO plan.
+             </p>
+           </div>
+        </div>
+      )}
+
+      {/* Company Info */}
+      {profile?.company && (
+        <Card className="p-4 bg-surface/50">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-text-main">Informacije o kompaniji</h3>
+            <Badge variant={profile.status === UserStatus.APPROVED ? 'success' : 'warning'}>
+              {profile.status === UserStatus.APPROVED ? 'Odobreno' : 'Na čekanju'}
+            </Badge>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p className="text-text-muted text-xs uppercase tracking-wider">Naziv</p>
+              <p className="font-medium text-text-main">{profile.company.name}</p>
+            </div>
+            <div>
+              <p className="text-text-muted text-xs uppercase tracking-wider">PIB/Matični</p>
+              <p className="font-medium text-text-main">{profile.company.registrationNumber}</p>
+            </div>
+            <div>
+              <p className="text-text-muted text-xs uppercase tracking-wider">Lokacija</p>
+              <p className="font-medium text-text-main">{profile.company.city}, {profile.company.country}</p>
+            </div>
+            <div>
+              <p className="text-text-muted text-xs uppercase tracking-wider">Kategorija</p>
+              <p className="font-medium text-text-main text-xs">
+                {profile.company.category === 'Transport Company / Carrier' ? 'Prevoznik' :
+                 profile.company.category === 'Freight Forwarder' ? 'Špediter' :
+                 profile.company.category || 'N/A'}
+              </p>
+            </div>
+          </div>
+        </Card>
       )}
 
       {/* Stats Grid */}
@@ -48,8 +120,24 @@ export const Overview = () => {
         {[
           { label: 'Aktivne Ture', val: myLoads.length, icon: Package, color: 'text-brand-500', bg: 'bg-brand-500/10', border: 'border-brand-500/20' },
           { label: 'Moji Kamioni', val: myTrucks.length, icon: Truck, color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-          { label: 'Pregledi', val: '128', icon: Activity, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-          { label: 'Paket', val: currentUser?.plan, icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', capitalize: true }
+          { label: 'Pregledi', val: '0', icon: Activity, color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+          { 
+            label: 'Plan', 
+            val: profile?.plan === 'free' ? 'FREE' : 
+                 profile?.plan === 'standard' ? 'STANDARD' : 
+                 profile?.plan === 'pro' ? 'PRO' : 'N/A', 
+            icon: TrendingUp, 
+            color: profile?.plan === 'free' ? 'text-gray-500' : 
+                   profile?.plan === 'standard' ? 'text-blue-500' : 
+                   profile?.plan === 'pro' ? 'text-amber-500' : 'text-gray-500', 
+            bg: profile?.plan === 'free' ? 'bg-gray-500/10' : 
+                profile?.plan === 'standard' ? 'bg-blue-500/10' : 
+                profile?.plan === 'pro' ? 'bg-amber-500/10' : 'bg-gray-500/10', 
+            border: profile?.plan === 'free' ? 'border-gray-500/20' : 
+                    profile?.plan === 'standard' ? 'border-blue-500/20' : 
+                    profile?.plan === 'pro' ? 'border-amber-500/20' : 'border-gray-500/20', 
+            capitalize: true 
+          }
         ].map((stat, i) => (
           <Card key={i} className={`p-4 flex items-center justify-between hover:bg-surfaceHighlight transition-colors border-border`}>
              <div>

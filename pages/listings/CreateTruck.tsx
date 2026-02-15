@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore } from '../../context/StoreContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, Input, Button, Select } from '../../components/UIComponents';
 import { UserStatus } from '../../types';
 
 export const CreateTruck = () => {
   const navigate = useNavigate();
-  const { createTruck, currentUser } = useStore();
+  const { profile } = useAuth();
+
+  // TODO: Implement createTruck function with Supabase
+  const createTruck = (data: any) => {
+    console.log('Creating truck:', data);
+    // This will be implemented with SupabaseService.createTruck
+  };
 
   const [form, setForm] = useState({
     originCountry: '',
@@ -20,12 +26,25 @@ export const CreateTruck = () => {
     description: ''
   });
 
-  if (currentUser?.status !== UserStatus.APPROVED) {
+  if (profile?.status !== UserStatus.APPROVED) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center p-4">
-        <h2 className="text-2xl font-bold text-slate-900">Pristup ograničen</h2>
-        <p className="text-slate-500 mt-2">Morate imati odobren nalog da biste objavljivali kamione.</p>
+        <h2 className="text-2xl font-bold text-text-main">Nalog čeka odobrenje</h2>
+        <p className="text-text-muted mt-2">Morate imati odobren nalog da biste objavljivali kamione. Molimo sačekajte odobrenje administratora.</p>
         <Button className="mt-6" onClick={() => navigate('/dashboard')}>Nazad</Button>
+      </div>
+    );
+  }
+
+  if (profile?.plan === 'free') {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center p-4">
+        <h2 className="text-2xl font-bold text-text-main">Potreban je upgrade plana</h2>
+        <p className="text-text-muted mt-2">Sa FREE planom možete samo pregledati kamione. Za objavljovanje potreban je STANDARD ili PRO plan.</p>
+        <div className="flex gap-3 mt-6">
+          <Button onClick={() => navigate('/pricing')} variant="primary">Pogledaj planove</Button>
+          <Button onClick={() => navigate('/dashboard')} variant="outline">Nazad</Button>
+        </div>
       </div>
     );
   }
@@ -38,11 +57,11 @@ export const CreateTruck = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-slate-900">Objavi slobodan kamion</h1>
+      <h1 className="text-2xl font-bold text-text-main">Objavi slobodan kamion</h1>
       <Card className="p-8 shadow-md">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
-             <h3 className="font-semibold text-slate-800 border-b pb-2">Trenutna lokacija i dostupnost</h3>
+             <h3 className="font-semibold text-text-main border-b border-border pb-2">Trenutna lokacija i dostupnost</h3>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input label="Država" required value={form.originCountry} onChange={e => setForm({...form, originCountry: e.target.value})} />
                 <Input label="Grad" required value={form.originCity} onChange={e => setForm({...form, originCity: e.target.value})} />
@@ -54,7 +73,7 @@ export const CreateTruck = () => {
           </div>
 
           <div className="space-y-4 pt-4">
-             <h3 className="font-semibold text-slate-800 border-b pb-2">Detalji vozila</h3>
+             <h3 className="font-semibold text-text-main border-b border-border pb-2">Detalji vozila</h3>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Select 
                   label="Vrsta vozila"

@@ -1,13 +1,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Truck, Check, Package, Zap, BarChart, ArrowLeftRight, Shield, Bell, Map, Search, ChevronRight, Play, LayoutGrid, Smartphone, Mail, Sun, Moon, Users, Globe, Clock, HelpCircle, FileText, Navigation, Filter, Sliders, X, MousePointer2, ShieldCheck, Box, Wifi, Home, User, Plus, Battery, Quote, Star, TrendingUp } from 'lucide-react';
+import { ArrowRight, Truck, Check, Package, Zap, BarChart, Bell, Search, LayoutGrid, Smartphone, Sun, Moon, Users, Globe, HelpCircle, MousePointer2, Box, Wifi, Home, User, Plus, Battery, Quote, Star, TrendingUp } from 'lucide-react';
 import { Button, Badge, Card, cn } from '../components/UIComponents';
-import { useStore } from '../context/StoreContext';
-import { features } from 'process';
+import { useAuth } from '../context/AuthContext';
 
 // Counting Number Animation Component
-const CountingNumber = ({ target, duration = 2000, delay = 0, format }) => {
+const CountingNumber = ({ target, duration = 2000, delay = 0, format }: {
+  target: number;
+  duration?: number;
+  delay?: number;
+  format: string;
+}) => {
   const [count, setCount] = useState(0);
   const [started, setStarted] = useState(false);
 
@@ -22,8 +26,8 @@ const CountingNumber = ({ target, duration = 2000, delay = 0, format }) => {
   useEffect(() => {
     if (!started) return;
 
-    let startTime = null;
-    const animate = (currentTime) => {
+    let startTime: number | null = null;
+    const animate = (currentTime: number) => {
       if (startTime === null) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
       
@@ -42,7 +46,7 @@ const CountingNumber = ({ target, duration = 2000, delay = 0, format }) => {
   }, [started, target, duration]);
 
   // Format the number based on the final format
-  const formatNumber = (num) => {
+  const formatNumber = (num: number) => {
     if (format.includes('€') && format.includes('k')) {
       return `€${(num / 1000).toFixed(1)}k`;
     }
@@ -53,7 +57,11 @@ const CountingNumber = ({ target, duration = 2000, delay = 0, format }) => {
 };
 
 // Typewriter Text Animation Component
-const TypewriterText = ({ text, delay = 0, speed = 50 }) => {
+const TypewriterText = ({ text, delay = 0, speed = 50 }: {
+  text: string;
+  delay?: number;
+  speed?: number;
+}) => {
   const [displayText, setDisplayText] = useState('');
   const [started, setStarted] = useState(false);
 
@@ -88,12 +96,35 @@ const TypewriterText = ({ text, delay = 0, speed = 50 }) => {
 export const Landing = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0); // 0: Alarms, 1: Matching, 2: Analytics
-  const { theme, toggleTheme } = useStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const { isAuthenticated, profile, signOut } = useAuth();
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('lbx_theme', newTheme);
+    document.documentElement.classList.toggle('dark');
+  };
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    // Theme initialization
+    const savedTheme = localStorage.getItem('lbx_theme') as 'dark' | 'light';
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+    } else {
+      document.documentElement.classList.add('dark');
+      setTheme('dark');
+    }
   }, []);
 
   const features = [
@@ -145,8 +176,9 @@ export const Landing = () => {
     <div className="min-h-screen bg-background font-sans text-text-main selection:bg-brand-500/30 selection:text-brand-500 overflow-x-hidden transition-colors duration-300">
       
       {/* Navbar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled ? 'bg-background/90 backdrop-blur-md border-border py-3' : 'bg-transparent border-transparent py-6'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 border-b ${scrolled || mobileMenuOpen ? 'bg-surface border-border py-3' : 'bg-transparent border-transparent py-6'}`}>
         <div className="mx-auto flex h-10 max-w-7xl items-center justify-between px-6 lg:px-8">
+          {/* Logo */}
           <div className="flex items-center gap-2.5">
              <div className="h-7 w-7 bg-brand-500 rounded-lg flex items-center justify-center shadow-sm">
                 <span className="text-white dark:text-black font-black text-lg leading-none">T</span>
@@ -156,11 +188,17 @@ export const Landing = () => {
                 <span className="text-xl font-bold tracking-tight text-brand-500">Link</span>
              </div>
           </div>
-          <div className="hidden md:flex items-center gap-8">
+
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-8">
              <a href="#features" className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">Mogućnosti</a>
              <Link to="/pricing" className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">Cenovnik</Link>
+             <Link to="/loads" className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">Berza Tereta</Link>
+             <Link to="/trucks" className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">Berza Kamiona</Link>
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Desktop Right Side */}
+          <div className="hidden md:flex items-center gap-3">
             <select className="h-9 pl-3 pr-8 rounded-lg bg-surface border border-border text-text-main text-xs font-medium focus:outline-none focus:border-brand-500 transition-colors cursor-pointer appearance-none bg-no-repeat bg-right" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23A1A1AA' d='M6 9L1 4h10z'/%3E%3C/svg%3E\")", backgroundPosition: 'right 0.5rem center', backgroundSize: '12px' }}>
               <option>🇷🇸 SR</option>
               <option>🇬🇧 EN</option>
@@ -168,14 +206,211 @@ export const Landing = () => {
             <button onClick={toggleTheme} className="h-9 w-9 rounded-lg bg-surface border border-border flex items-center justify-center text-text-muted hover:text-text-main hover:border-brand-500/50 transition-all">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <Link to="/login" className="hidden sm:block text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">
-              Prijavi se
-            </Link>
-            <Link to="/register">
-              <Button size="sm" variant="primary">
-                 REGISTRUJ SE
-              </Button>
-            </Link>
+            
+            {isAuthenticated ? (
+              // Logged in state
+              <>
+                <span className="text-xs text-text-muted">
+                  Dobrodošli, {profile?.name}
+                </span>
+                <Link to="/dashboard" className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">
+                  Dashboard
+                </Link>
+                <button 
+                  onClick={signOut}
+                  className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest"
+                >
+                  Odjavi se
+                </button>
+              </>
+            ) : (
+              // Logged out state
+              <>
+                <Link to="/login" className="text-xs font-medium text-text-muted hover:text-text-main transition-colors uppercase tracking-widest">
+                  Prijavi se
+                </Link>
+                <Link to="/register">
+                  <Button size="sm" variant="primary">
+                     REGISTRUJ SE
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Right Side */}
+          <div className="flex md:hidden items-center gap-2">
+            {/* Theme Toggle - Mobile */}
+            <button onClick={toggleTheme} className="h-9 w-9 rounded-lg bg-surface border border-border flex items-center justify-center text-text-muted hover:text-text-main hover:border-brand-500/50 transition-all">
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="h-9 w-9 rounded-lg bg-surface border border-border flex items-center justify-center text-text-muted hover:text-text-main hover:border-brand-500/50 transition-all relative z-50"
+            >
+              <div className="relative w-5 h-5">
+                <span className={`absolute block h-0.5 w-5 bg-current transform transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 top-2' : 'top-1'}`}></span>
+                <span className={`absolute block h-0.5 w-5 bg-current transform transition-all duration-300 top-2 ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+                <span className={`absolute block h-0.5 w-5 bg-current transform transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 top-2' : 'top-3'}`}></span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        <div className={`fixed inset-0 bg-surface transition-all duration-300 md:hidden z-[50] ${mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} style={{ height: 'calc(100svh - 80px)', top: '80px' }}>
+          {/* Subtle background texture */}
+          <div className="absolute inset-0 bg-dot-pattern opacity-30"></div>
+          
+          <div className="flex flex-col h-full pt-8 relative z-10">
+            {/* Mobile Menu Content */}
+            <div className="flex-1 px-6 py-8 space-y-6 overflow-y-auto">
+              
+              {/* Navigation Links */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="h-2 w-2 bg-brand-500 rounded-full"></div>
+                  <h3 className="text-[10px] font-bold text-text-main uppercase tracking-widest">Navigacija</h3>
+                </div>
+                
+                <a 
+                  href="#features" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-background hover:bg-surfaceHighlight transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-500 group-hover:bg-brand-500 group-hover:text-black transition-all">
+                    <Zap className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-text-main">Mogućnosti</div>
+                    <div className="text-xs text-text-muted">Funkcije platforme</div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-text-muted group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
+                </a>
+
+                <Link 
+                  to="/pricing" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-background hover:bg-surfaceHighlight transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-500 group-hover:bg-brand-500 group-hover:text-black transition-all">
+                    <Star className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-text-main">Cenovnik</div>
+                    <div className="text-xs text-text-muted">Planovi i cene</div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-text-muted group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
+                </Link>
+
+                <Link 
+                  to="/loads" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-background hover:bg-surfaceHighlight transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-500 group-hover:bg-brand-500 group-hover:text-black transition-all">
+                    <Package className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-text-main">Berza Tereta</div>
+                    <div className="text-xs text-text-muted">Pronađi teret</div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-text-muted group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
+                </Link>
+
+                <Link 
+                  to="/trucks" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-background hover:bg-surfaceHighlight transition-all group"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-500 group-hover:bg-brand-500 group-hover:text-black transition-all">
+                    <Truck className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-bold text-text-main">Berza Kamiona</div>
+                    <div className="text-xs text-text-muted">Pronađi vozilo</div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-text-muted group-hover:text-brand-500 group-hover:translate-x-1 transition-all" />
+                </Link>
+              </div>
+
+              {/* Language Selector */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 bg-brand-500 rounded-full"></div>
+                  <h3 className="text-[10px] font-bold text-text-main uppercase tracking-widest">Jezik</h3>
+                </div>
+                <div className="flex gap-3">
+                  <button className="flex-1 h-12 px-4 rounded-lg bg-brand-500 text-black font-bold text-sm flex items-center justify-center gap-2 hover:bg-brand-400 transition-all">
+                    🇷🇸 Srpski
+                  </button>
+                  <button className="flex-1 h-12 px-4 rounded-lg bg-background text-text-muted font-medium text-sm flex items-center justify-center gap-2 hover:bg-surfaceHighlight hover:text-text-main transition-all">
+                    🇬🇧 English
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Menu Footer - Fixed at bottom */}
+            <div className="px-6 py-6 bg-background border-t border-border">
+              <div className="space-y-4">
+                {isAuthenticated ? (
+                  // Logged in state
+                  <>
+                    <div className="text-center p-3 bg-surface rounded-lg">
+                      <div className="text-sm font-bold text-text-main">Dobrodošli, {profile?.name}</div>
+                      <div className="text-xs text-text-muted mt-1">{profile?.company?.name}</div>
+                    </div>
+                    <Link 
+                      to="/dashboard" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full h-12 px-4 rounded-lg bg-brand-500 text-black font-bold text-sm flex items-center justify-center hover:bg-brand-400 transition-all"
+                    >
+                      Idite na Dashboard
+                    </Link>
+                    <button 
+                      onClick={() => {
+                        signOut();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="block w-full h-12 px-4 rounded-lg bg-surface text-text-main font-medium text-sm flex items-center justify-center hover:bg-surfaceHighlight transition-all"
+                    >
+                      Odjavi se
+                    </button>
+                  </>
+                ) : (
+                  // Logged out state
+                  <>
+                    <Link 
+                      to="/login" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full h-12 px-4 rounded-lg bg-surface text-text-main font-medium text-sm flex items-center justify-center hover:bg-surfaceHighlight transition-all"
+                    >
+                      Prijavi se
+                    </Link>
+                    <Link 
+                      to="/register" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full"
+                    >
+                      <Button size="md" variant="primary" className="w-full h-12">
+                        REGISTRUJ SE BESPLATNO
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+              
+              {/* Status Indicator */}
+              <div className="flex items-center justify-center gap-2 mt-6 p-3 rounded-lg bg-surface">
+                <div className="w-2 h-2 bg-brand-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-text-main font-medium">Sistem aktivan</span>
+                <span className="text-xs text-text-muted">•</span>
+                <span className="text-xs text-brand-500 font-bold">2,400+ korisnika</span>
+              </div>
+            </div>
           </div>
         </div>
       </nav>

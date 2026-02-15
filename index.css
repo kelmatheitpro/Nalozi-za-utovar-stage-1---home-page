@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light Mode Variables - Softer, warmer palette */
+  --background: #FAFAF9; /* stone-50 - warmer off-white */
+  --surface: #F5F5F4; /* stone-100 - subtle warm gray */
+  --surface-highlight: #E7E5E4; /* stone-200 - soft contrast */
+  --border: #D6D3D1; /* stone-300 - visible but soft borders */
+  --text-main: #1C1917; /* stone-900 - deep warm black */
+  --text-muted: #78716C; /* stone-500 - warm muted text */
+  --text-inverted: #FAFAFA;
+  --dot-color: #D6D3D1; /* Subtle dots */
+  --grid-line-color: rgba(0, 0, 0, 0.03); /* Very subtle grid */
+}
+
+.dark {
+  /* Dark Mode Variables */
+  --background: #09090B;
+  --surface: #18181B;
+  --surface-highlight: #27272A;
+  --border: rgba(255, 255, 255, 0.1);
+  --text-main: #FAFAFA;
+  --text-muted: #A1A1AA;
+  --text-inverted: #18181B;
+  --dot-color: rgba(255, 255, 255, 0.1);
+  --grid-line-color: rgba(255, 255, 255, 0.1); /* Show grid lines in dark mode */
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Subtle texture for light theme */
+body:not(.dark) {
+  background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.015) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

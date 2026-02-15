@@ -1,10 +1,13 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { StoreProvider } from './context/StoreContext';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { Landing } from './pages/Landing';
 import { Login } from './pages/auth/Login';
 import { Register } from './pages/auth/Register';
 import { ForgotPassword } from './pages/auth/ForgotPassword';
+import { EmailConfirmed } from './pages/auth/EmailConfirmed';
+import { PendingApproval } from './pages/PendingApproval';
 import { Pricing } from './pages/Pricing';
 import { AppLayout } from './components/layout/AppLayout';
 import { Overview } from './pages/dashboard/Overview';
@@ -16,7 +19,7 @@ import { AdminPanel } from './pages/admin/AdminPanel';
 
 const App = () => {
   return (
-    <StoreProvider>
+    <AuthProvider>
       <HashRouter>
         <Routes>
           {/* Public Routes */}
@@ -24,16 +27,29 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/email-confirmed" element={<EmailConfirmed />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/pending-approval" element={<PendingApproval />} />
 
-          {/* Protected Routes */}
-          <Route element={<AppLayout />}>
+          {/* Protected Routes - Require Authentication AND Approval */}
+          <Route element={
+            <ProtectedRoute requireApproval>
+              <AppLayout />
+            </ProtectedRoute>
+          }>
+            {/* Routes accessible only to approved users */}
             <Route path="/dashboard" element={<Overview />} />
             <Route path="/loads" element={<LoadBoard />} />
             <Route path="/trucks" element={<TruckBoard />} />
             <Route path="/post-load" element={<CreateLoad />} />
             <Route path="/post-truck" element={<CreateTruck />} />
-            <Route path="/admin" element={<AdminPanel />} />
+            
+            {/* Admin routes - nested within approved routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute requireAdmin>
+                <AdminPanel />
+              </ProtectedRoute>
+            } />
             
             {/* Plans route redirects to pricing for now */}
             <Route path="/plans" element={<Navigate to="/pricing" replace />} />
@@ -42,7 +58,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>
-    </StoreProvider>
+    </AuthProvider>
   );
 };
 

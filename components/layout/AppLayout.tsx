@@ -1,11 +1,11 @@
 import React from 'react';
 import { Sidebar } from './Sidebar';
 import { Outlet, Navigate } from 'react-router-dom';
-import { useStore } from '../../context/StoreContext';
-import { Menu } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Menu, LogOut } from 'lucide-react';
 
 export const AppLayout = () => {
-  const { isAuthenticated } = useStore();
+  const { isAuthenticated, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   if (!isAuthenticated) {
@@ -34,9 +34,18 @@ export const AppLayout = () => {
             <div className="flex items-center gap-2 font-bold text-lg text-white">
                Nalozi za utovar
             </div>
-            <button onClick={() => setSidebarOpen(true)} className="p-2 text-slate-400 hover:text-white">
-              <Menu className="h-6 w-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={signOut}
+                className="p-2 text-slate-400 hover:text-white transition-colors"
+                title="Odjavi se"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+              <button onClick={() => setSidebarOpen(true)} className="p-2 text-slate-400 hover:text-white">
+                <Menu className="h-6 w-6" />
+              </button>
+            </div>
         </div>
 
         <main className="flex-1 overflow-y-auto p-4 lg:p-8 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-surface via-background to-background">

@@ -1,27 +1,38 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useStore } from '../../context/StoreContext';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Button, Input, Card } from '../../components/UIComponents';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, AlertCircle } from 'lucide-react';
 
 export const Login = () => {
   const navigate = useNavigate();
-  const { login } = useStore();
-  const [email, setEmail] = useState('');
+  const location = useLocation();
+  const { signIn, loading } = useAuth();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const from = location.state?.from?.pathname || '/dashboard';
+  const isApproved = new URLSearchParams(location.search).get('approved') === 'true';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(email);
-    if (success) {
-      navigate('/dashboard');
-    } else {
-      setError('Pogrešan email ili korisnik ne postoji.');
-    }
-  };
+    setIsLoading(true);
+    setError('');
 
-  const handleDemoLogin = (demoEmail: string) => {
-    login(demoEmail).then(() => navigate('/dashboard'));
+    try {
+      await signIn(formData.email, formData.password);
+      console.log('Login successful, navigating to dashboard...');
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || 'Greška pri prijavljivanju');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,41 +55,57 @@ export const Login = () => {
         </div>
 
         <Card className="p-8 border-border shadow-2xl bg-surface/80 backdrop-blur-xl">
+          {isApproved && (
+            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-500 font-medium text-sm">Vaš nalog je odobren!</span>
+              </div>
+              <p className="text-green-500/80 text-xs mt-1">Sada možete da se prijavite i koristite platformu.</p>
+            </div>
+          )}
+          
           <form className="space-y-5" onSubmit={handleSubmit}>
             <Input
               label="Email adresa"
               type="email"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
               placeholder="ime@firma.com"
-              error={error}
             />
-            <div className="space-y-1">
-               <div className="flex justify-between">
-                  <label className="block text-sm font-medium text-text-muted">Lozinka</label>
-                  <Link to="/forgot-password" className="text-xs text-brand-500 hover:text-brand-400">Zaboravljena lozinka?</Link>
-               </div>
-               <Input
-                 type="password"
-                 placeholder="••••••••"
-                 disabled
-               />
+            <Input
+              label="Lozinka"
+              type="password"
+              required
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              placeholder="••••••••"
+            />
+            
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-xs text-brand-500 hover:text-brand-400">
+                Zaboravljena lozinka?
+              </Link>
             </div>
-            <Button type="submit" className="w-full h-11 text-sm font-bold shadow-glow uppercase tracking-wide" size="md" variant="primary">Prijavi se</Button>
-          </form>
 
-          <div className="mt-8 pt-8 border-t border-border">
-            <p className="text-[10px] font-bold text-text-muted text-center uppercase tracking-widest mb-4">Brzi Demo Pristup</p>
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" size="sm" onClick={() => handleDemoLogin('admin@loadboardx.com')}>
-                Admin
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => handleDemoLogin('carrier@example.com')}>
-                Prevoznik
-              </Button>
-            </div>
-          </div>
+            {error && (
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                <span className="text-red-500 text-sm">{error}</span>
+              </div>
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full h-11 text-sm font-bold shadow-glow uppercase tracking-wide" 
+              size="md" 
+              variant="primary"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Prijavljivanje...' : 'Prijavi se'}
+            </Button>
+          </form>
         </Card>
       </div>
     </div>
