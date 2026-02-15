@@ -246,8 +246,9 @@ export const Register = () => {
                    <Input name="jobTitle" label="Pozicija u firmi" value={formData.jobTitle} onChange={handleChange} placeholder="npr. Direktor, Špediter..." />
                 </div>
                 
+                <Input name="email" label="Email Adresa" type="email" required value={formData.email} onChange={handleChange} />
+                
                 <div className="grid md:grid-cols-2 gap-6">
-                   <Input name="email" label="Email Adresa" type="email" required value={formData.email} onChange={handleChange} />
                    <div className="grid grid-cols-3 gap-2">
                      <Select 
                        name="personalPhoneCountryCode" 
@@ -260,9 +261,6 @@ export const Register = () => {
                        <Input name="directPhone" label="Direktan telefon" value={formData.directPhone} onChange={handleChange} placeholder="11 123 4567" />
                      </div>
                    </div>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-6">
                    <div className="grid grid-cols-3 gap-2">
                      <Select 
                        name="personalPhoneCountryCode" 
@@ -275,7 +273,6 @@ export const Register = () => {
                        <Input name="mobilePhone" label="Mobilni telefon" value={formData.mobilePhone} onChange={handleChange} placeholder="64 123 4567" />
                      </div>
                    </div>
-                   <div></div>
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-6">
