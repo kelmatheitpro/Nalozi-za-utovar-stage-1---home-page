@@ -1,5 +1,5 @@
-// Google Places Autocomplete API service
-// Docs: https://developers.google.com/maps/documentation/places/web-service/autocomplete
+// Google Places Autocomplete API service using JavaScript API
+// Docs: https://developers.google.com/maps/documentation/javascript/places-autocomplete
 
 const GOOGLE_PLACES_API_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
 
@@ -19,31 +19,49 @@ export interface City {
   country: string;
 }
 
-interface PlacePrediction {
-  description: string;
-  place_id: string;
-  types?: string[];
-  structured_formatting: {
-    main_text: string;
-    secondary_text: string;
-  };
-  terms: Array<{
-    offset: number;
-    value: string;
-  }>;
-}
+// Load Google Maps JavaScript API
+let googleMapsLoaded = false;
+let googleMapsLoadPromise: Promise<void> | null = null;
 
-interface PlaceDetails {
-  result: {
-    address_components: Array<{
-      long_name: string;
-      short_name: string;
-      types: string[];
-    }>;
-  };
-}
+const loadGoogleMapsAPI = (): Promise<void> => {
+  if (googleMapsLoaded) return Promise.resolve();
+  if (googleMapsLoadPromise) return googleMapsLoadPromise;
 
-// Search cities using Google Places Autocomplete API
+  googleMapsLoadPromise = new Promise((resolve, reject) => {
+    if (typeof window === 'undefined') {
+      reject(new Error('Window is not defined'));
+      return;
+    }
+
+    // Check if already loaded
+    if (window.google?.maps?.places) {
+      googleMapsLoaded = true;
+      resolve();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_PLACES_API_KEY}&libraries=places&language=en`;
+    script.async = true;
+    script.defer = true;
+    
+    script.onload = () => {
+      googleMapsLoaded = true;
+      resolve();
+    };
+    
+    script.onerror = () => {
+      googleMapsLoadPromise = null;
+      reject(new Error('Failed to load Google Maps API'));
+    };
+    
+    document.head.appendChild(script);
+  });
+
+  return googleMapsLoadPromise;
+};
+
+// Search cities using Google Places Autocomplete Service
 export const searchCitiesWithGoogle = async (query: string, country: string): Promise<City[]> => {
   if (!query || query.length < 2) return [];
   if (!GOOGLE_PLACES_API_KEY) {
@@ -55,86 +73,93 @@ export const searchCitiesWithGoogle = async (query: string, country: string): Pr
   if (!countryCode) return [];
 
   try {
-    // Using Places Autocomplete API
-    // Removed types=(cities) to include all localities (cities, towns, villages)
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?` +
-      `input=${encodeURIComponent(query)}&` +
-      `components=country:${countryCode}&` +
-      `language=en&` +
-      `key=${GOOGLE_PLACES_API_KEY}`;
+    // Load Google Maps API if not already loaded
+    await loadGoogleMapsAPI();
+
+    // Create AutocompleteService
+    const service = new google.maps.places.AutocompleteService();
     
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Failed to fetch cities from Google Places');
-    
-    const data = await response.json();
-    
-    if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-      console.error('Google Places API error:', data.status, data.error_message);
-      return [];
-    }
-    
-    if (!data.predictions || data.predictions.length === 0) {
-      return [];
-    }
-    
-    // Filter to only include localities (cities, towns, villages)
-    const localityPredictions = data.predictions.filter((pred: PlacePrediction) => 
-      pred.types?.some(type => 
-        type === 'locality' || 
-        type === 'administrative_area_level_3' ||
-        type === 'sublocality'
-      )
-    );
-    
-    // Get details for each place to extract postal code
-    const cities: City[] = [];
-    
-    for (const prediction of localityPredictions.slice(0, 15)) {
-      const cityName = prediction.structured_formatting.main_text;
-      
-      // Try to get postal code from place details
-      const postalCode = await getPostalCodeForPlace(prediction.place_id);
-      
-      cities.push({
-        name: cityName,
-        postalCode: postalCode || '00000',
-        country: country
+    // Request predictions
+    const request: google.maps.places.AutocompletionRequest = {
+      input: query,
+      componentRestrictions: { country: countryCode },
+      language: 'en',
+      // Removed types to include all localities (cities, towns, villages)
+    };
+
+    return new Promise((resolve) => {
+      service.getPlacePredictions(request, async (predictions, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+          console.log('Google Places status:', status);
+          resolve([]);
+          return;
+        }
+
+        // Filter to only include localities (cities, towns, villages)
+        const localityPredictions = predictions.filter(pred => 
+          pred.types.some(type => 
+            type === 'locality' || 
+            type === 'administrative_area_level_3' ||
+            type === 'sublocality'
+          )
+        );
+
+        // Get details for each place to extract postal code
+        const cities: City[] = [];
+        
+        for (const prediction of localityPredictions.slice(0, 15)) {
+          const cityName = prediction.structured_formatting.main_text;
+          
+          // Try to get postal code from place details
+          const postalCode = await getPostalCodeForPlace(prediction.place_id);
+          
+          cities.push({
+            name: cityName,
+            postalCode: postalCode || '00000',
+            country: country
+          });
+        }
+        
+        resolve(cities);
       });
-    }
-    
-    return cities;
+    });
   } catch (error) {
     console.error('Error fetching cities from Google Places:', error);
     return [];
   }
 };
 
-// Get postal code for a specific place
+// Get postal code for a specific place using PlacesService
 const getPostalCodeForPlace = async (placeId: string): Promise<string | null> => {
   if (!GOOGLE_PLACES_API_KEY) return null;
   
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?` +
-      `place_id=${placeId}&` +
-      `fields=address_components&` +
-      `key=${GOOGLE_PLACES_API_KEY}`;
+    await loadGoogleMapsAPI();
+
+    // Create a dummy div for PlacesService (required by Google API)
+    const dummyDiv = document.createElement('div');
+    const service = new google.maps.places.PlacesService(dummyDiv);
     
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    
-    const data: PlaceDetails = await response.json();
-    
-    if (data.result && data.result.address_components) {
-      const postalComponent = data.result.address_components.find(
-        component => component.types.includes('postal_code')
+    return new Promise((resolve) => {
+      service.getDetails(
+        {
+          placeId: placeId,
+          fields: ['address_components']
+        },
+        (place, status) => {
+          if (status !== google.maps.places.PlacesServiceStatus.OK || !place) {
+            resolve(null);
+            return;
+          }
+
+          const postalComponent = place.address_components?.find(
+            component => component.types.includes('postal_code')
+          );
+          
+          resolve(postalComponent?.long_name || null);
+        }
       );
-      
-      if (postalComponent) {
-        return postalComponent.long_name;
-      }
-    }
-    
-    return null;
+    });
   } catch (error) {
     console.error('Error fetching postal code:', error);
     return null;

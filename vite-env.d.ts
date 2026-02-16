@@ -3,8 +3,16 @@
 interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string
   readonly VITE_SUPABASE_ANON_KEY: string
+  readonly VITE_GOOGLE_PLACES_API_KEY: string
 }
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
+}
+
+// Google Maps API types
+declare global {
+  interface Window {
+    google: typeof google;
+  }
 }
