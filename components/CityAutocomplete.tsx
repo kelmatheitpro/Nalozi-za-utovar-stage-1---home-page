@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { searchCities, City } from '../utils/cities';
+import { searchCitiesOnline } from '../services/geonamesService';
 
 interface CityAutocompleteProps {
   name: string;
@@ -25,18 +26,46 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
   const [suggestions, setSuggestions] = useState<City[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (value.length >= 2) {
-      const results = searchCities(value, country);
-      setSuggestions(results);
-      setShowSuggestions(results.length > 0);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
-    setSelectedIndex(-1);
+    const fetchCities = async () => {
+      if (value.length >= 2) {
+        setLoading(true);
+        
+        // First try local database
+        const localResults = searchCities(value, country);
+        
+        // If we have local results, use them
+        if (localResults.length > 0) {
+          setSuggestions(localResults);
+          setShowSuggestions(true);
+          setLoading(false);
+        } else {
+          // Otherwise, fetch from GeoNames API
+          try {
+            const onlineResults = await searchCitiesOnline(value, country);
+            setSuggestions(onlineResults);
+            setShowSuggestions(onlineResults.length > 0);
+          } catch (error) {
+            console.error('Error fetching cities:', error);
+            setSuggestions([]);
+            setShowSuggestions(false);
+          } finally {
+            setLoading(false);
+          }
+        }
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setLoading(false);
+      }
+      setSelectedIndex(-1);
+    };
+
+    const debounceTimer = setTimeout(fetchCities, 300);
+    return () => clearTimeout(debounceTimer);
   }, [value, country]);
 
   // Close suggestions when clicking outside
@@ -52,10 +81,13 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
   }, []);
 
   const handleSelectCity = (city: City) => {
+    // Format: "PostalCode, CityName" (e.g., "11000, Beograd")
+    const cityValue = `${city.postalCode}, ${city.name}`;
+    
     const syntheticEvent = {
       target: {
         name,
-        value: city.name
+        value: cityValue
       }
     } as React.ChangeEvent<HTMLInputElement>;
     
@@ -93,11 +125,13 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
   };
 
   return (
-    <div ref={wrapperRef} className="relative">
-      <label className="block text-sm font-medium text-text-main mb-2">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
+    <div ref={wrapperRef} className="relative w-full group">
+      {label && (
+        <label className="block text-sm font-medium text-text-muted mb-1.5">
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+      )}
       <input
         type="text"
         name={name}
@@ -108,7 +142,7 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
         required={required}
         placeholder={placeholder}
         autoComplete="off"
-        className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-text-main placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+        className="flex h-10 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-main placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 hover:border-text-muted"
       />
       
       {showSuggestions && suggestions.length > 0 && (
@@ -126,6 +160,12 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
               <span className="text-text-muted text-xs">{city.country}</span>
             </button>
           ))}
+        </div>
+      )}
+      
+      {loading && (
+        <div className="absolute z-50 w-full mt-1 bg-surface border border-border rounded-lg shadow-2xl p-4 text-center">
+          <span className="text-text-muted text-sm">Pretraga...</span>
         </div>
       )}
       
