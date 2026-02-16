@@ -64,7 +64,7 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
       setSelectedIndex(-1);
     };
 
-    const debounceTimer = setTimeout(fetchCities, 300);
+    const debounceTimer = setTimeout(fetchCities, 200);
     return () => clearTimeout(debounceTimer);
   }, [value, country]);
 

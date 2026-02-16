@@ -40,12 +40,14 @@ export const searchCitiesOnline = async (query: string, country: string): Promis
 
   try {
     // Using Nominatim search API - searches for cities, towns, villages
+    // Using 'accept-language=en' to get Latin script results
     const url = `https://nominatim.openstreetmap.org/search?` + 
       `q=${encodeURIComponent(query)}&` +
       `countrycodes=${countryCode}&` +
       `format=json&` +
       `addressdetails=1&` +
-      `limit=15&` +
+      `limit=20&` +
+      `accept-language=en&` + // Force Latin script
       `featuretype=settlement`;
     
     const response = await fetch(url, {
