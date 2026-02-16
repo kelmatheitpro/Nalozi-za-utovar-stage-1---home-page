@@ -22,6 +22,7 @@ export interface City {
 interface PlacePrediction {
   description: string;
   place_id: string;
+  types?: string[];
   structured_formatting: {
     main_text: string;
     secondary_text: string;
@@ -55,9 +56,9 @@ export const searchCitiesWithGoogle = async (query: string, country: string): Pr
 
   try {
     // Using Places Autocomplete API
+    // Removed types=(cities) to include all localities (cities, towns, villages)
     const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?` +
       `input=${encodeURIComponent(query)}&` +
-      `types=(cities)&` +
       `components=country:${countryCode}&` +
       `language=en&` +
       `key=${GOOGLE_PLACES_API_KEY}`;
@@ -76,10 +77,19 @@ export const searchCitiesWithGoogle = async (query: string, country: string): Pr
       return [];
     }
     
+    // Filter to only include localities (cities, towns, villages)
+    const localityPredictions = data.predictions.filter((pred: PlacePrediction) => 
+      pred.types?.some(type => 
+        type === 'locality' || 
+        type === 'administrative_area_level_3' ||
+        type === 'sublocality'
+      )
+    );
+    
     // Get details for each place to extract postal code
     const cities: City[] = [];
     
-    for (const prediction of data.predictions.slice(0, 10)) {
+    for (const prediction of localityPredictions.slice(0, 15)) {
       const cityName = prediction.structured_formatting.main_text;
       
       // Try to get postal code from place details
