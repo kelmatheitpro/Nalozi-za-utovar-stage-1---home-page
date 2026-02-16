@@ -239,6 +239,69 @@ export const Register = () => {
             {step === 1 && (
               <div className="space-y-6 animate-fade-in">
                 <div>
+                   <h3 className="text-lg font-bold text-white">Podaci o Firmi</h3>
+                   <p className="text-xs text-zinc-500 uppercase tracking-wide">Verifikacija Poslovanja</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                   <Input name="companyName" label="Naziv Firme" required value={formData.companyName} onChange={handleChange} />
+                   <Input name="registrationNumber" label="PIB / Matični Broj" required value={formData.registrationNumber} onChange={handleChange} />
+                </div>
+                
+                <Select 
+                  name="category" 
+                  label="Kategorija" 
+                  value={formData.category} 
+                  onChange={handleChange}
+                  options={Object.values(CompanyCategory).map(c => ({ value: c, label: c }))}
+                />
+
+                <div className="grid grid-cols-2 gap-6">
+                   <Select 
+                     name="country" 
+                     label="Država" 
+                     required 
+                     value={formData.country} 
+                     onChange={handleChange}
+                     options={BALKAN_COUNTRIES.map(c => ({ value: c.name, label: c.name }))}
+                   />
+                   <Input name="city" label="Grad" required value={formData.city} onChange={handleChange} />
+                </div>
+                
+                <Input name="address" label="Adresa" required value={formData.address} onChange={handleChange} />
+                
+                <div className="grid grid-cols-2 gap-6">
+                   <div className="grid grid-cols-3 gap-2">
+                     <Select 
+                       name="companyPhoneCountryCode" 
+                       label="Kod" 
+                       value={formData.companyPhoneCountryCode} 
+                       onChange={handleChange}
+                       options={BALKAN_COUNTRIES.map(c => ({ value: c.phoneCode, label: c.phoneCode }))}
+                     />
+                     <div className="col-span-2">
+                       <Input name="phone" label="Telefon firme" required value={formData.phone} onChange={handleChange} placeholder="11 123 4567" />
+                     </div>
+                   </div>
+                   <Input name="companyEmail" label="Email Firme" type="email" required value={formData.companyEmail} onChange={handleChange} />
+                </div>
+
+                <div className="pt-6">
+                   <Button 
+                     type="button" 
+                     variant="primary" 
+                     className="w-full h-11 uppercase tracking-wide text-xs"
+                     onClick={() => setStep(2)}
+                   >
+                     Nastavi
+                   </Button>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-6 animate-fade-in">
+                <div>
                    <h3 className="text-lg font-bold text-white">Lični Podaci</h3>
                    <p className="text-xs text-zinc-500 uppercase tracking-wide">Kontakt Osoba</p>
                 </div>
@@ -298,62 +361,6 @@ export const Register = () => {
                    />
                 </div>
                 
-                <div className="pt-4">
-                   <Button type="button" className="w-full h-11 uppercase tracking-wide text-xs" onClick={() => setStep(2)}>Nastavi</Button>
-                </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-6 animate-fade-in">
-                <div>
-                   <h3 className="text-lg font-bold text-white">Podaci o Firmi</h3>
-                   <p className="text-xs text-zinc-500 uppercase tracking-wide">Verifikacija Poslovanja</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6">
-                   <Input name="companyName" label="Naziv Firme" required value={formData.companyName} onChange={handleChange} />
-                   <Input name="registrationNumber" label="PIB / Matični Broj" required value={formData.registrationNumber} onChange={handleChange} />
-                </div>
-                
-                <Select 
-                  name="category" 
-                  label="Kategorija" 
-                  value={formData.category} 
-                  onChange={handleChange}
-                  options={Object.values(CompanyCategory).map(c => ({ value: c, label: c }))}
-                />
-
-                <div className="grid grid-cols-2 gap-6">
-                   <Select 
-                     name="country" 
-                     label="Država" 
-                     required 
-                     value={formData.country} 
-                     onChange={handleChange}
-                     options={BALKAN_COUNTRIES.map(c => ({ value: c.name, label: c.name }))}
-                   />
-                   <Input name="city" label="Grad" required value={formData.city} onChange={handleChange} />
-                </div>
-                
-                <Input name="address" label="Adresa" required value={formData.address} onChange={handleChange} />
-                
-                <div className="grid grid-cols-2 gap-6">
-                   <div className="grid grid-cols-3 gap-2">
-                     <Select 
-                       name="companyPhoneCountryCode" 
-                       label="Kod" 
-                       value={formData.companyPhoneCountryCode} 
-                       onChange={handleChange}
-                       options={BALKAN_COUNTRIES.map(c => ({ value: c.phoneCode, label: c.phoneCode }))}
-                     />
-                     <div className="col-span-2">
-                       <Input name="phone" label="Telefon firme" required value={formData.phone} onChange={handleChange} placeholder="11 123 4567" />
-                     </div>
-                   </div>
-                   <Input name="companyEmail" label="Email Firme" type="email" required value={formData.companyEmail} onChange={handleChange} />
-                </div>
-
                 <div className="pt-6 flex gap-4">
                    <Button type="button" variant="outline" className="flex-1 uppercase tracking-wide text-xs" onClick={() => setStep(1)}>Nazad</Button>
                    <Button 
