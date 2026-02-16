@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { searchCities, City } from '../utils/cities';
-import { searchCitiesOnline } from '../services/geonamesService';
+import { searchCitiesOnline } from '../services/citySearchService';
 
 interface CityAutocompleteProps {
   name: string;
