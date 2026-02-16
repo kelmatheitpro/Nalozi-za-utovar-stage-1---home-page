@@ -5,6 +5,8 @@ import { Button, Input, Select, Card } from '../../components/UIComponents';
 import { CompanyCategory } from '../../types';
 import { TermsOfService } from '../../components/TermsOfService';
 import { BALKAN_COUNTRIES, getPhoneCodeByCountry } from '../../utils/countries';
+import { CityAutocomplete } from '../../components/CityAutocomplete';
+import { City } from '../../utils/cities';
 import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 
 // Registration form with improved phone field layout
@@ -265,7 +267,15 @@ export const Register = () => {
                      onChange={handleChange}
                      options={BALKAN_COUNTRIES.map(c => ({ value: c.name, label: c.name }))}
                    />
-                   <Input name="city" label="Grad" required value={formData.city} onChange={handleChange} />
+                   <CityAutocomplete
+                     name="city"
+                     label="Grad"
+                     value={formData.city}
+                     country={formData.country}
+                     required
+                     onChange={handleChange}
+                     placeholder="Unesite grad..."
+                   />
                 </div>
                 
                 <Input name="address" label="Adresa" required value={formData.address} onChange={handleChange} />
