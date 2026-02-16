@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { searchCities, City } from '../utils/cities';
-import { searchCitiesOnline } from '../services/citySearchService';
+import { searchCitiesWithGoogle } from '../services/googlePlacesService';
 
 interface CityAutocompleteProps {
   name: string;
@@ -34,27 +34,34 @@ export const CityAutocomplete: React.FC<CityAutocompleteProps> = ({
       if (value.length >= 2) {
         setLoading(true);
         
-        // First try local database
+        // First try local database for instant results
         const localResults = searchCities(value, country);
         
-        // If we have local results, use them
         if (localResults.length > 0) {
           setSuggestions(localResults);
           setShowSuggestions(true);
-          setLoading(false);
-        } else {
-          // Otherwise, fetch from GeoNames API
-          try {
-            const onlineResults = await searchCitiesOnline(value, country);
-            setSuggestions(onlineResults);
-            setShowSuggestions(onlineResults.length > 0);
-          } catch (error) {
-            console.error('Error fetching cities:', error);
+        }
+        
+        // Then fetch from Google Places API for complete results
+        try {
+          const googleResults = await searchCitiesWithGoogle(value, country);
+          if (googleResults.length > 0) {
+            setSuggestions(googleResults);
+            setShowSuggestions(true);
+          } else if (localResults.length === 0) {
+            // If no results from both sources
             setSuggestions([]);
             setShowSuggestions(false);
-          } finally {
-            setLoading(false);
           }
+        } catch (error) {
+          console.error('Error fetching cities:', error);
+          // Keep local results if Google fails
+          if (localResults.length === 0) {
+            setSuggestions([]);
+            setShowSuggestions(false);
+          }
+        } finally {
+          setLoading(false);
         }
       } else {
         setSuggestions([]);
